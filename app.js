@@ -435,7 +435,7 @@ function intro() {
   const el = document.createElement('div');
   el.className = 'gsplash intro';
   el.innerHTML = `<div class="rzx"><img src="img/rzx.png" alt="RZX Studio"></div>
-    <div class="gs-game"><div class="gs-art">${logoArt('flappy')}</div><div class="gs-name">Jumpy Cardinal</div><div class="gs-bar"><i></i></div></div>`;
+    <div class="gs-game"><div class="gs-art">${logoArt('flappy')}</div><div class="gs-name">Jumpy Cardinal</div></div>`;
   document.body.appendChild(el);
   const end = () => { el.classList.add('out'); setTimeout(() => el.remove(), 350); };
   el.addEventListener('pointerdown', end, { once: true });   // un toucher passe l'intro
@@ -467,7 +467,7 @@ function intro() {
     navigator.vibrate?.(30);
     box.remove();
     el.classList.add('game');   // le fond passe au ciel du jeu, l'oiseau et le nom arrivent
-    setTimeout(end, 1600);
+    setTimeout(end, 2600);   // l'oiseau sautille 1 s de plus avant le menu
   }, 1750);
   img.decode ? img.decode().then(go, go) : go();
 }
