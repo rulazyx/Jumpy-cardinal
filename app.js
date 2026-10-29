@@ -369,12 +369,45 @@ ui.addEventListener('submit', async (e) => {
 });
 window.addEventListener('online', () => LB.flush(s));
 
-// ---------- Démarrage : écran de chargement, puis menu ----------
-const splash = document.createElement('div');
-splash.className = 'gsplash';
-splash.innerHTML = `<div class="gs-art">${logoArt('flappy')}</div><div class="gs-name">Jumpy Cardinal</div><div class="gs-bar"><i></i></div>`;
-document.body.appendChild(splash);
-setTimeout(() => splash.remove(), 1150);
+// ---------- Démarrage : logo RZX Studio (apparaît, se resserre, éclate), puis écran de chargement du jeu, puis menu ----------
+function intro() {
+  const el = document.createElement('div');
+  el.className = 'gsplash intro';
+  el.innerHTML = `<div class="rzx"><img src="img/rzx.png" alt="RZX Studio"></div>
+    <div class="gs-game"><div class="gs-art">${logoArt('flappy')}</div><div class="gs-name">Jumpy Cardinal</div><div class="gs-bar"><i></i></div></div>`;
+  document.body.appendChild(el);
+  const end = () => { el.classList.add('out'); setTimeout(() => el.remove(), 350); };
+  el.addEventListener('pointerdown', end, { once: true });   // un toucher passe l'intro
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { el.classList.add('game'); setTimeout(end, 1400); return; }
+  const box = el.querySelector('.rzx'), img = box.querySelector('img');
+  const go = () => setTimeout(() => {
+    // Éclats : le logo est découpé en triangles (grille déformée) qui partent depuis le centre en tournant
+    const r = box.getBoundingClientRect(), cols = 5, rows = 3, pt = [];
+    for (let y = 0; y <= rows; y++) for (let x = 0; x <= cols; x++) {
+      const edge = x === 0 || y === 0 || x === cols || y === rows;
+      pt.push([(x + (edge ? 0 : (Math.random() - 0.5) * 0.7)) / cols * 100, (y + (edge ? 0 : (Math.random() - 0.5) * 0.7)) / rows * 100]);
+    }
+    const P = (x, y) => pt[y * (cols + 1) + x], tris = [];
+    for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) {
+      const a = P(x, y), b = P(x + 1, y), c = P(x + 1, y + 1), d = P(x, y + 1);
+      tris.push((x + y) % 2 ? [a, b, c] : [a, b, d], (x + y) % 2 ? [a, c, d] : [b, c, d]);
+    }
+    for (const t of tris) {
+      const sh = document.createElement('div'); sh.className = 'shard';
+      Object.assign(sh.style, { left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px`, clipPath: `polygon(${t.map(([x, y]) => `${x}% ${y}%`).join(',')})` });
+      sh.innerHTML = `<img src="img/rzx.png" alt="">`;
+      el.appendChild(sh);
+      const cx = (t[0][0] + t[1][0] + t[2][0]) / 3 - 50, cy = (t[0][1] + t[1][1] + t[2][1]) / 3 - 50, k = 6 + Math.random() * 6;
+      sh.animate([{ transform: 'none', opacity: 1 }, { transform: `translate(${cx * k}px, ${cy * k * 1.6 + 120}px) rotate(${(Math.random() - 0.5) * 540}deg) scale(.6)`, opacity: 0 }],
+        { duration: 750 + Math.random() * 250, easing: 'cubic-bezier(.15,.7,.4,1)', fill: 'forwards' });
+    }
+    box.remove();
+    el.classList.add('game');   // le fond passe au ciel du jeu, l'oiseau et le nom arrivent
+    setTimeout(end, 1500);
+  }, 1050);
+  img.decode ? img.decode().then(go, go) : go();
+}
+intro();
 newRun();
 if (!s.pseudo) sheet = { type: 'pseudo' };
 render();

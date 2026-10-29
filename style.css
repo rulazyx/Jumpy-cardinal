@@ -1,4 +1,5 @@
 /* Jumpy Cardinal. Styles du jeu et de l'écran de chargement repris de COLOCATION, menus ajoutés pour l'appli. */
+@font-face { font-family: 'Glacial Indifference'; src: url('fonts/GlacialIndifference-Bold.woff2') format('woff2'); font-weight: 700; font-display: swap; }   /* nom du jeu (licence OFL) */
 @font-face { font-family: 'Lilita One'; src: url('fonts/LilitaOne.woff2') format('woff2'); font-weight: 400; font-display: swap; }   /* police cartoon, embarquée pour marcher hors ligne (licence OFL) */
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; overflow: hidden; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
@@ -29,7 +30,7 @@ body:has(.ui.m-home) .gmute { display: none; }   /* le bouton son reste en parti
 @media (max-width: 380px) { .round { width: 40px; height: 40px; } .round svg, .round img { width: 26px; height: 26px; } .topbar { gap: 6px; } }
 
 .home { flex: 1; width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
-.home h1 { margin: 0; font: 400 clamp(34px, 10vw, 52px)/1 'Lilita One', 'Chalkboard SE', 'Arial Rounded MT Bold', sans-serif; color: #fff; letter-spacing: .02em; text-transform: uppercase; white-space: nowrap; -webkit-text-stroke: 2.5px #fff; paint-order: stroke fill; text-align: center; }   /* trait blanc sur blanc : lettres plus épaisses, sans contour visible */
+.home h1 { margin: 0; font: 700 clamp(32px, 9.5vw, 50px)/1 'Glacial Indifference', 'Avenir Next', 'Futura', system-ui, sans-serif; color: #fff; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; -webkit-text-stroke: 1.5px #fff; paint-order: stroke fill; text-align: center; text-shadow: 0 2px 6px rgba(0,60,110,.25); }   /* Glacial Indifference en capitales, légèrement épaissie */
 .best { margin: 0; color: #fff; font-size: 18px; font-weight: 800; text-shadow: 0 1px 3px rgba(0,60,110,.35); }
 .logo { display: flex; flex-direction: column; align-items: center; }
 .dot { position: absolute; top: 6px; right: 8px; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: #ef4444; color: #fff; font: 800 12px/20px system-ui; font-style: normal; }
@@ -107,7 +108,7 @@ input { width: 100%; padding: 14px; border: 2px solid #e5e7eb; border-radius: 12
 .gl-bird { width: min(36vw, 140px); animation: gshop .7s cubic-bezier(.3,0,.4,1) infinite; transform-origin: 50% 100%; }
 .gl-bird svg, .gl-bird img { display: block; width: 100%; height: auto; overflow: visible; }
 .gl-shadow { width: min(20vw, 80px); height: 10px; border-radius: 50%; background: rgba(0,0,0,.18); margin-top: 4px; animation: gshad .7s cubic-bezier(.3,0,.4,1) infinite; }
-.gs-name { margin-top: 26px; font: 400 30px/1 'Lilita One', 'Chalkboard SE', sans-serif; letter-spacing: .01em; color: #fff; text-align: center; padding: 0 16px; }
+.gs-name { margin-top: 26px; font: 700 30px/1 'Glacial Indifference', 'Avenir Next', system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #fff; text-align: center; padding: 0 16px; }
 .gs-bar { margin-top: 18px; width: 120px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.3); overflow: hidden; }
 .gs-bar i { display: block; height: 100%; width: 0; background: #fff; border-radius: 3px; animation: gsfill .85s ease-out forwards; }
 @keyframes gshop { 0%,100% { transform: translateY(0) scale(1.08,.9); } 12% { transform: translateY(0) scale(.96,1.05); } 50% { transform: translateY(-30px) scale(.97,1.04); } 88% { transform: translateY(0) scale(1,1); } }
@@ -149,3 +150,17 @@ textarea { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius:
 .addf { flex-direction: row; } .addf input { flex: 1; padding: 10px; font-size: 16px; } .addf .gh-btn { flex-shrink: 0; }
 .board li b small { display: block; font-size: 11px; font-weight: 700; }
 .board li .av { --s: 34px; }
+
+/* Intro : logo RZX Studio sur fond blanc (apparaît, se resserre, éclate), puis le ciel du jeu avec l'oiseau et le nom */
+.gsplash.intro { animation: none; background: #fff; overflow: hidden; }
+.gsplash.intro::before { content: ""; position: absolute; inset: 0; background: linear-gradient(#7ad0ff, #bfeaff); opacity: 0; transition: opacity .6s ease; }
+.gsplash.intro.game::before { opacity: 1; }
+.gsplash.intro.out { opacity: 0; transition: opacity .3s ease; }
+.rzx { position: absolute; width: min(72vw, 420px); animation: rzxin 1.05s cubic-bezier(.3,1.3,.5,1) both; }
+.rzx img, .shard img { display: block; width: 100%; height: auto; }
+@keyframes rzxin { 0% { transform: scale(.4); opacity: 0; } 35% { transform: scale(1.06); opacity: 1; } 55% { transform: scale(1); } 80% { transform: scale(1.02); } 100% { transform: scale(.62); } }
+.shard { position: fixed; z-index: 2; pointer-events: none; will-change: transform, opacity; }
+.gs-game { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; opacity: 0; transform: scale(.85); }
+.gsplash.intro.game .gs-game { opacity: 1; transform: none; transition: opacity .45s ease .15s, transform .5s cubic-bezier(.3,1.4,.5,1) .15s; }
+.gsplash.intro.game .gs-bar i { animation: gsfill 1.3s ease-out forwards; }
+.gsplash.intro .gs-bar i { animation: none; }
