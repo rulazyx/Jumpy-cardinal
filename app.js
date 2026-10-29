@@ -116,10 +116,10 @@ function homeHTML() {
     <div class="logo"><div class="gl-bird">${birdImg(s.bird, 140)}</div><div class="gl-shadow"></div></div>
     <h1>Jumpy Cardinal</h1>
     <p class="best">RECORD : <b>${s.best}</b>${s.rank ? ` · ${s.rank}<sup>e</sup> mondial` : ''}</p>
-    <button class="gh-btn go big" data-a="play">${gIcon('play')}Jouer</button>
-    <button class="gh-btn big crate wide ${ms ? 'ready' : ''}" data-a="quests">${SCROLL(30)}Quêtes${ms ? `<i class="dot">${ms}</i>` : ''}</button>
-    <div class="row23"><button class="gh-btn big crate ${crateReady ? 'ready' : ''}" data-a="crate">${CRATE(30)}Boîte mystère</button>
+    <div class="row23"><button class="gh-btn go big" data-a="play">${gIcon('play')}Jouer</button>
       <button class="gh-btn big crate side" data-a="wardrobe" aria-label="Oiseaux et cadres">${HANGER(34)}</button></div>
+    <button class="gh-btn big crate wide ${ms ? 'ready' : ''}" data-a="quests">${SCROLL(30)}Quêtes${ms ? `<i class="dot">${ms}</i>` : ''}</button>
+    <button class="gh-btn big crate wide ${crateReady ? 'ready' : ''}" data-a="crate">${CRATE(30)}Boîte mystère</button>
   </div>`;
 }
 
