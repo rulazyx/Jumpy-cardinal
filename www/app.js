@@ -22,6 +22,7 @@ const TROPHY = (size = 30) => `<svg viewBox="0 0 48 48" width="${size}" height="
 const HANGER = (size = 30) => `<svg viewBox="0 0 48 48" width="${size}" height="${size}" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 17v-3a4.5 4.5 0 1 0-4.5-4.5" stroke="#6b4a2b" stroke-width="2.6"/><path d="M24 17 5 33a3 3 0 0 0 2 5.3h34A3 3 0 0 0 43 33z" fill="#e2a35c" stroke="#6b4a2b" stroke-width="2.4"/><path d="M10 34h28" stroke="#fde7c3" stroke-width="2.2"/></svg>`;
 const FRIENDS = (size = 30) => `<svg viewBox="0 0 48 48" width="${size}" height="${size}" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><circle cx="32" cy="16" r="6.5" fill="#93c5fd" stroke="#1e40af"/><path d="M21 39c0-7 5-12 11-12s11 5 11 12z" fill="#93c5fd" stroke="#1e40af"/><circle cx="17" cy="18" r="7" fill="#fca5a5" stroke="#991b1b"/><path d="M4 41c0-8 6-13 13-13s13 5 13 13z" fill="#fca5a5" stroke="#991b1b"/></svg>`;
 const SCROLL = (size = 30) => `<svg viewBox="0 0 48 48" width="${size}" height="${size}" fill="none" stroke="#7c4a12" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8h26a4 4 0 0 1 0 8h-4v22a4 4 0 0 1-4 4H10a4 4 0 0 1 0-8h4V12a4 4 0 0 1 4-4" fill="#fde7b0"/><path d="M14 34h12a4 4 0 0 1-4 8M20 18h8M20 25h8"/><path d="M38 8a4 4 0 0 0-4 4v4" /></svg>`;
+const GEAR = (size = 30) => `<svg viewBox="0 0 48 48" width="${size}" height="${size}" aria-hidden="true"><path d="M20.5 4h7l1.2 5.3 3.6 1.5 4.6-2.9 5 5-2.9 4.6 1.5 3.6 5.3 1.2v7l-5.3 1.2-1.5 3.6 2.9 4.6-5 5-4.6-2.9-3.6 1.5-1.2 5.3h-7l-1.2-5.3-3.6-1.5-4.6 2.9-5-5 2.9-4.6-1.5-3.6L4 27.5v-7l5.3-1.2 1.5-3.6-2.9-4.6 5-5 4.6 2.9 3.6-1.5z" fill="#cbd5e1" stroke="#475569" stroke-width="2.2" stroke-linejoin="round"/><circle cx="24" cy="24" r="6.5" fill="#fff" stroke="#475569" stroke-width="2.2"/></svg>`;
 const DECOR = (size = 30) => `<svg viewBox="0 0 48 48" width="${size}" height="${size}" fill="none" stroke="#1f5d3a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="8" width="38" height="32" rx="6" fill="#7ec8e3" stroke="#2a6f8f"/><circle cx="33" cy="17" r="4" fill="#facc15" stroke="#b7791f"/><path d="M5 34l11-12 9 9 6-6 12 11v-2a6 6 0 0 1-6 6H11a6 6 0 0 1-6-6z" fill="#7bbf59"/></svg>`;
 const TARGET = (size = 30) => `<svg viewBox="0 0 48 48" width="${size}" height="${size}" fill="none" stroke="#991b1b" stroke-width="2.2" aria-hidden="true"><circle cx="24" cy="24" r="18" fill="#fff"/><circle cx="24" cy="24" r="12" fill="#ef4444"/><circle cx="24" cy="24" r="6" fill="#fff"/><circle cx="24" cy="24" r="2" fill="#991b1b"/></svg>`;
 const RAR_CLS = { 'Commun': 'rar-c', 'Rare': 'rar-r', 'Épique': 'rar-e', 'Légendaire': 'rar-l' };
@@ -29,22 +30,22 @@ const imgCache = {};
 const birdImg = (k, size) => `<img class="bimg" src="${imgCache[k] ??= birdPreview(k, 160)}" width="${size}" height="${size}" alt="">`;
 // Oiseau dans son cadre (profil, amis, classement) et badge de niveau coloré selon le grade
 const avatar = (bird, frame, size) => `<span class="av fr-${esc(frame || 'simple')}" style="--s:${size}px">${birdImg(bird || 'cardinal', Math.round(size * 0.78))}</span>`;
-const lvlBadge = (lvl) => `<i class="lvl" style="background:${gradeOf(lvl || 1).color}">${lvl || 1}</i>`;
+const lvlBadge = (lvl) => `<i class="lvl">${lvl || 1}</i>`;   // pastille bleue du niveau
 const tabs = (cur, list) => `<div class="tabs">${list.map(([k, label]) => `<button class="${cur === k ? 'on' : ''}" data-a="tab" data-k="${k}">${label}</button>`).join('')}</div>`;
 const SUPPORT_FAQ = [
   ['Ma partie est-elle sauvegardée ?', 'Oui, sur ton téléphone. Pièces, oiseaux, niveau et défis restent même sans connexion. Attention : désinstaller l\'appli les efface.'],
   ['Comment gagner des oiseaux ?', 'Avec la boîte mystère : 150 pièces, ou une boîte gratuite par jour contre une pub.'],
   ['Comment gagner des pièces ?', 'En atteignant de nouveaux décors pendant une partie, en réussissant les défis du jour et en montant de niveau.'],
-  ['Comment débloquer des cadres ?', 'En montant de niveau. L\'XP se gagne avec les défis du jour et en atteignant de nouveaux décors pendant une partie.'],
+  ['Comment débloquer des cadres ?', 'En montant de niveau. L\'EXP se gagne avec les défis du jour et en atteignant de nouveaux décors pendant une partie.'],
   ['Mon score n\'apparaît pas au classement', 'Il part dès que tu as du réseau. Vérifie que tu as choisi un pseudo.'],
 ];
-const reward = (r) => [r.coins ? `+${r.coins} ${COIN}` : '', r.xp ? `+${r.xp} XP` : ''].filter(Boolean).join(' · ');
+const reward = (r) => [r.coins ? `+${r.coins} ${COIN}` : '', r.xp ? `+${r.xp} EXP` : ''].filter(Boolean).join(' · ');
 
 const APP_VERSION = '1.0.0';
 const s = S.load();
 const root = document.getElementById('game');
 const ui = document.getElementById('ui');
-let mode = 'home', run = null, sheet = null, sky = '#7ec8e3';
+let mode = 'home', run = null, sheet = null, bubble = false, sky = '#7ec8e3';
 
 // ---------- Jeu ----------
 const game = mount(root, {
@@ -97,24 +98,28 @@ function revive() {
 function topbar() {
   return `<div class="topbar">
     <span class="pill coins">${COIN}<b>${s.coins}</b></span>
-    <button class="pill xpbar" data-a="profile" aria-label="Niveau ${s.level}, ${s.xp} sur ${xpToNext(s.level)} XP">${lvlBadge(s.level)}<span class="xpb"><i style="width:${Math.min(100, (s.xp / xpToNext(s.level)) * 100)}%"></i><small>${s.xp} / ${xpToNext(s.level)} XP</small></span></button>
-    <button class="round" data-a="friends" aria-label="Amis">${FRIENDS(30)}</button>
-    <button class="round prof" data-a="profile" aria-label="Profil et paramètres">${avatar(s.bird, s.frame, 46)}${lvlBadge(s.level)}</button>
+    <button class="xpbar" data-a="profile" aria-label="Niveau ${s.level}, ${s.xp} sur ${xpToNext(s.level)} EXP">${lvlBadge(s.level)}<span class="xpwrap"><b class="xplab">EXP</b><span class="xpb"><i style="width:${Math.min(100, (s.xp / xpToNext(s.level)) * 100)}%"></i><small>${s.xp} / ${xpToNext(s.level)}</small></span></span></button>
+    <button class="round prof ${bubble ? 'open' : ''}" data-a="bubble" aria-label="Menu du profil" aria-expanded="${bubble}">${avatar(s.bird, s.frame, 46)}${lvlBadge(s.level)}</button>
+    ${bubble ? `<div class="bubble" role="menu">
+      <button role="menuitem" data-a="profile">${avatar(s.bird, s.frame, 28)}Profil</button>
+      <button role="menuitem" data-a="friends">${FRIENDS(26)}Amis</button>
+      <button role="menuitem" data-a="board">${TROPHY(26)}Classement</button>
+      <button role="menuitem" data-a="settings">${GEAR(26)}Paramètres</button></div>` : ''}
   </div>`;
 }
 
 function homeHTML() {
-  const ms = S.missionsToClaim(s);
+  const ms = S.missionsToClaim(s), pool = S.cratePool(s);
+  const crateReady = pool.length && (s.adBoxDay !== S.dayOf() || s.coins >= BIRD_CRATE.price);   // une boîte peut être ouverte maintenant
   return `${topbar()}
   <div class="home">
     <div class="logo"><div class="gl-bird">${birdImg(s.bird, 140)}</div><div class="gl-shadow"></div></div>
     <h1>Jumpy Cardinal</h1>
     <p class="best">RECORD : <b>${s.best}</b>${s.rank ? ` · ${s.rank}<sup>e</sup> mondial` : ''}</p>
     <button class="gh-btn go big" data-a="play">${gIcon('play')}Jouer</button>
-    <div class="row23"><button class="gh-btn big crate" data-a="crate">${CRATE(30)}Boîte mystère${S.cratePool(s).length && s.adBoxDay !== S.dayOf() ? '<i class="dot">1</i>' : ''}</button>
+    <button class="gh-btn big crate wide ${ms ? 'ready' : ''}" data-a="quests">${SCROLL(30)}Quêtes${ms ? `<i class="dot">${ms}</i>` : ''}</button>
+    <div class="row23"><button class="gh-btn big crate ${crateReady ? 'ready' : ''}" data-a="crate">${CRATE(30)}Boîte mystère</button>
       <button class="gh-btn big crate side" data-a="wardrobe" aria-label="Oiseaux et cadres">${HANGER(34)}</button></div>
-    <div class="row23"><button class="gh-btn big crate" data-a="quests">${SCROLL(30)}Quêtes${ms ? `<i class="dot">${ms}</i>` : ''}</button>
-      <button class="gh-btn big crate side" data-a="board" aria-label="Classement">${TROPHY(34)}</button></div>
   </div>`;
 }
 
@@ -123,7 +128,7 @@ function overHTML() {
   return `<div class="panel over">
     <h2>${run.record ? 'Nouveau record !' : 'Partie terminée'}</h2>
     <p class="big-score">${sc}</p>
-    <p class="sub">Record : ${s.best}${run.coins ? ` · +${run.coins} ${COIN}` : ''} ${run.xp ? ` · +${run.xp} XP` : ''}</p>
+    <p class="sub">Record : ${s.best}${run.coins ? ` · +${run.coins} ${COIN}` : ''} ${run.xp ? ` · +${run.xp} EXP` : ''}</p>
     ${canAd ? `<button class="gh-btn ad" data-a="rev-ad">▶ Repartir avec une pub</button>` : ''}
     <div class="two"><button class="gh-btn" data-a="play">${gIcon('replay')}Rejouer</button><button class="gh-btn" data-a="home">${gIcon('home')}Menu</button></div>
   </div>`;
@@ -181,16 +186,25 @@ function sheetHTML() {
         <div class="pf-av">${avatar(s.bird, s.frame, 104)}${lvlBadge(s.level)}</div>
         <h2>${esc(s.pseudo || 'Sans pseudo')}</h2><button class="link" data-a="pseudo">${s.pseudo ? 'Modifier mon pseudo' : 'Choisir un pseudo'}</button>
         <p class="grade" style="color:${g.color}">${esc(g.name)} · niveau ${s.level}</p>
-        <div class="xp"><div class="bar"><i style="width:${(s.xp / need) * 100}%"></i></div><small>${s.xp} / ${need} XP${next ? ` · ${esc(next.name)} au niveau ${next.lvl}` : ''}</small></div>
+        <div class="xp"><div class="bar"><i style="width:${(s.xp / need) * 100}%"></i></div><small>${s.xp} / ${need} EXP${next ? ` · ${esc(next.name)} au niveau ${next.lvl}` : ''}</small></div>
         <div class="stats">
           <button data-a="wardrobe"><small>Oiseau</small><b>${esc(s.bird === 'cardinal' ? 'Cardinal' : SHOP.bird.find((b) => b.key === s.bird)?.name)}</b></button>
           <button data-a="wardrobe" data-k="frames"><small>Cadre</small><b>${esc(FRAMES.find((f) => f.key === s.frame)?.name)}</b></button>
           <div><small>Record</small><b>${s.best}</b></div>
           <div><small>Classement</small><b>${s.rank ? `${s.rank}<sup>e</sup>` : '–'}</b></div>
         </div>
-        <div class="two"><button class="gh-btn" data-a="support">Support</button><button class="gh-btn" data-a="feedback" data-k="bug">Signaler un bug</button></div>
-        ${privacyLinks()}</div>`;
+      </div>`;
     }
+    case 'settings':
+      return `<div class="panel">${close}<h2>Paramètres</h2>
+        <div class="setlist">
+          <button data-a="mute"><span>Son</span><b class="sw ${game.muted ? '' : 'on'}"><i></i></b></button>
+          <button data-a="ads-privacy"><span>Choix pour les pubs</span><em>›</em></button>
+          <button data-a="support"><span>Support</span><em>›</em></button>
+          <button data-a="feedback" data-k="bug"><span>Signaler un bug</span><em>›</em></button>
+          <a href="confidentialite.html" target="_blank" rel="noopener"><span>Confidentialité</span><em>›</em></a>
+          ${LB.enabled() && s.pseudo ? '<button data-a="delete"><span>Supprimer mes données</span><em>›</em></button>' : ''}
+        </div><p class="hint">Jumpy Cardinal ${APP_VERSION} · RZX Studio</p></div>`;
     case 'support':
       return `<div class="panel">${close}<h2>Support</h2><div class="faq">${SUPPORT_FAQ.map(([q, r]) => `<details><summary>${esc(q)}</summary><p>${esc(r)}</p></details>`).join('')}</div>
         <button class="gh-btn go" data-a="feedback" data-k="support">Écrire au support</button></div>`;
@@ -289,10 +303,14 @@ function toast(html) {
 
 // ---------- Actions ----------
 async function act(a, el) {
+  if (a !== 'bubble') bubble = false;   // la bulle du profil se ferme dès qu'on choisit quelque chose
   switch (a) {
     case 'play': play(); break;
     case 'home': mode = 'home'; sheet = null; game.restart(); render(); break;
     case 'close': sheet = null; render(); break;
+    case 'bubble': bubble = !bubble; render(); return;
+    case 'settings': sheet = { type: 'settings' }; render(); break;
+    case 'mute': game.toggleMute(); render(); break;
     case 'rev-ad': if (await showRewarded('Regarde la pub pour repartir au même score.')) revive(); break;
     case 'wardrobe': case 'quests': case 'profile': case 'support': sheet = { type: a, tab: el.dataset.k }; render(); break;
     case 'tab': sheet.tab = el.dataset.k; render(); break;
@@ -355,7 +373,11 @@ async function act(a, el) {
     }
   }
 }
-ui.addEventListener('click', (e) => { const b = e.target.closest('[data-a]'); if (b && !b.disabled) act(b.dataset.a, b); });
+ui.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-a]');
+  if (b && !b.disabled) act(b.dataset.a, b);
+  else if (bubble && !e.target.closest('.bubble')) { bubble = false; render(); }
+});
 ui.addEventListener('submit', async (e) => {
   e.preventDefault();
   const f = e.target.dataset.f, data = new FormData(e.target);
