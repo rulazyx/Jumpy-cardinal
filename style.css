@@ -226,3 +226,9 @@ textarea { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius:
 .mission.over { background: #f0fdf4; border: 2px dashed #86efac; }
 .mission.over b { color: #15803d; }
 .gh-btn.mini.ad { gap: 6px; color: #fff; }
+/* Écran d'accueil iPhone (plein écran sous l'heure) : iOS donne une hauteur de fenêtre trop courte de la taille de la barre d'état,
+   ce qui laissait une bande en bas. On prend la hauteur réelle de l'écran pour le jeu, les menus et l'intro. */
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  html, body { height: 100vh; }
+  .g-flappy, .ui, .gsplash { bottom: auto; height: 100vh; }
+}
