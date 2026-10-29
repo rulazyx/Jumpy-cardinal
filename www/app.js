@@ -94,9 +94,7 @@ function revive() {
 function topbar() {
   return `<div class="topbar">
     <span class="pill coins">${COIN}<b>${s.coins}</b></span>
-    <button class="round" data-a="wardrobe" aria-label="Oiseaux et cadres">${HANGER(30)}</button>
     <button class="round" data-a="friends" aria-label="Amis">${FRIENDS(30)}</button>
-    <button class="round" data-a="board" aria-label="Classement">${TROPHY(30)}</button>
     <button class="round prof" data-a="profile" aria-label="Profil et paramètres">${avatar(s.bird, s.frame, 46)}${lvlBadge(s.level)}</button>
   </div>`;
 }
@@ -109,8 +107,10 @@ function homeHTML() {
     <h1>Jumpy Cardinal</h1>
     <p class="best">RECORD : <b>${s.best}</b>${s.rank ? ` · ${s.rank}<sup>e</sup> mondial` : ''}</p>
     <button class="gh-btn go big" data-a="play">${gIcon('play')}Jouer</button>
-    <button class="gh-btn big crate" data-a="crate">${CRATE(30)}Boîte mystère${S.cratePool(s).length && s.adBoxDay !== S.dayOf() ? '<i class="dot">1</i>' : ''}</button>
-    <button class="gh-btn big crate" data-a="quests">${SCROLL(30)}Quêtes${ms ? `<i class="dot">${ms}</i>` : ''}</button>
+    <div class="row23"><button class="gh-btn big crate" data-a="crate">${CRATE(30)}Boîte mystère${S.cratePool(s).length && s.adBoxDay !== S.dayOf() ? '<i class="dot">1</i>' : ''}</button>
+      <button class="gh-btn big crate side" data-a="wardrobe" aria-label="Oiseaux et cadres">${HANGER(34)}</button></div>
+    <div class="row23"><button class="gh-btn big crate" data-a="quests">${SCROLL(30)}Quêtes${ms ? `<i class="dot">${ms}</i>` : ''}</button>
+      <button class="gh-btn big crate side" data-a="board" aria-label="Classement">${TROPHY(34)}</button></div>
   </div>`;
 }
 
