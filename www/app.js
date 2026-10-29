@@ -195,6 +195,11 @@ function sheetHTML() {
         </div>
       </div>`;
     }
+    case 'pause':
+      return `<div class="panel center"><h2>Pause</h2><p class="sub">Score : ${game.score}</p>
+        <button class="gh-btn go" data-a="resume">${gIcon('play')}Reprendre</button>
+        <div class="setlist wide"><button data-a="mute"><span>Son</span><b class="sw ${game.muted ? '' : 'on'}"><i></i></b></button></div>
+        <button class="gh-btn" data-a="quit">${gIcon('home')}Quitter la partie</button></div>`;
     case 'settings':
       return `<div class="panel">${close}<h2>Paramètres</h2>
         <div class="setlist">
@@ -289,7 +294,7 @@ function render() {
   root.classList.toggle('dim', mode !== 'play');
   ui.className = `ui m-${mode}`;
   game.menu(mode === 'home');
-  let h = mode === 'home' ? homeHTML() : mode === 'over' ? overHTML() : '';
+  let h = mode === 'home' ? homeHTML() : mode === 'over' ? overHTML() : sheet?.type === 'pause' ? '' : '<button class="pausebtn" data-a="pause" aria-label="Pause"><i></i><i></i></button>';
   if (sheet) h += `<div class="sheet">${sheetHTML()}</div>`;
   ui.innerHTML = h;
 }
@@ -308,6 +313,9 @@ async function act(a, el) {
     case 'play': play(); break;
     case 'home': mode = 'home'; sheet = null; game.restart(); render(); break;
     case 'close': sheet = null; render(); break;
+    case 'pause': if (mode === 'play') { game.pause(); sheet = { type: 'pause' }; render(); } break;
+    case 'resume': sheet = null; render(); game.resume(); break;
+    case 'quit': sheet = null; game.resume(); gameOver(game.score); act('home'); break;
     case 'bubble': bubble = !bubble; render(); return;
     case 'settings': sheet = { type: 'settings' }; render(); break;
     case 'mute': game.toggleMute(); render(); break;
@@ -452,3 +460,5 @@ if (!s.pseudo) sheet = { type: 'pseudo' };
 render();
 game.resume();   // l'oiseau flotte derrière le menu
 LB.flush(s);
+// L'appli passe en arrière-plan (appel, notification…) : la partie se met en pause
+document.addEventListener('visibilitychange', () => { if (document.hidden && mode === 'play' && run.started && !sheet) act('pause'); });
