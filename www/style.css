@@ -209,3 +209,11 @@ textarea { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius:
 .pausebtn i { display: block; width: 8px; height: 26px; border-radius: 3px; background: #fff; }
 .pausebtn:active { transform: scale(.9); }
 .setlist.wide { width: 100%; }
+/* Son : tout le bouton est cliquable, vert quand le son est activé, neutre sinon, la pastille glisse */
+.setlist > .snd { transition: background .25s ease, color .25s ease, box-shadow .25s ease; box-shadow: 0 3px 0 #d5dde7; }
+.setlist > .snd .sw { background: #cbd5e1; }
+.setlist > .snd.on { background: #22c55e; color: #fff; box-shadow: 0 3px 0 #15803d; }
+.setlist > .snd.on .sw { background: #15803d; }
+.setlist > .snd.on .sw i { left: 21px; }
+.setlist > .snd:active { transform: translateY(2px); box-shadow: 0 1px 0 #d5dde7; }
+.setlist > .snd.on:active { box-shadow: 0 1px 0 #15803d; }
