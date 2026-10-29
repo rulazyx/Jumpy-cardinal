@@ -34,5 +34,5 @@ Tout est sauvegardé sur l'appareil (`localStorage`), sans compte.
 
 ## Classement en ligne
 
-1. Créer un projet Supabase et exécuter `supabase/schema.sql`.
+1. Exécuter `supabase/schema.sql` dans un projet Supabase (aujourd’hui : le projet « Coloc », à côté de La Kaz).
 2. Mettre l'URL du projet et la clé publique (anon / publishable) dans `www/online.js`.
