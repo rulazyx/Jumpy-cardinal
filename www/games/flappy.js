@@ -354,7 +354,7 @@ function makeAudio() {
 const SPK_ON = gIcon('sound'), SPK_OFF = gIcon('mute');
 
 // Monte le jeu dans root. L'appli (app.js) gère les menus : onStage(palier) à chaque nouveau décor, onOver({ score, revived }) à la fin de l'animation de mort.
-export function mount(root, { bird, onStage, onOver, onFlap }) {
+export function mount(root, { bird, onStage, onOver, onFlap, onSky }) {
   let skin = { ...BASE, ...(SHOP.bird.find((b) => b.key === bird) ?? {}) };
   const snd = makeAudio();
   root.innerHTML = `<canvas class="gcanvas" width="${W}" height="${H}" aria-label="Jumpy Cardinal"></canvas>
@@ -373,7 +373,7 @@ export function mount(root, { bird, onStage, onOver, onFlap }) {
   fit();
   window.addEventListener('resize', fit);
   document.fonts?.load(`60px ${FONT}`);
-  let menu = false, paused = false, g = createGame(), raf = 0, last = 0, frame = 0, reported = false, destroyed = false;
+  let skyTop = '', menu = false, paused = false, g = createGame(), raf = 0, last = 0, frame = 0, reported = false, destroyed = false;
   const flap = () => { if (paused || g.dead || onFlap?.() === false) return; g.flap(); };
   const onKey = (e) => { if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); flap(); } };
   const onDown = (e) => { snd.unlock(); e.preventDefault(); flap(); };
@@ -390,6 +390,7 @@ export function mount(root, { bird, onStage, onOver, onFlap }) {
     const st = stageOf(g.score);
     if (st > g.stageMax) { g.stageMax = st; snd.play('stage'); onStage?.(st); }
     g.menu = menu; draw(ctx, g, frame, skin);
+    const top = themeAt(g.score).sT; if (top !== skyTop) { skyTop = top; onSky?.(top); }   // couleur du haut du ciel, pour la barre d'état du téléphone
     if (g.dead && !reported && g.deathT >= DEAD_F) { reported = true; onOver?.({ score: g.score, revived: g.revived }); }
     raf = requestAnimationFrame(loop);
   }

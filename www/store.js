@@ -1,5 +1,5 @@
 // Sauvegarde sur l'appareil (localStorage) : tout le jeu marche hors ligne
-import { SHOP, BIRD_CRATE, MISSIONS, MISSIONS_BONUS, XP_PER_GAME, xpToNext, levelReward } from './config.js';
+import { SHOP, BIRD_CRATE, MISSIONS, MISSIONS_BONUS, xpToNext, levelReward } from './config.js';
 
 const KEY = 'jc-save-v1';
 const pad = (n) => String(n).padStart(2, '0');
@@ -70,9 +70,9 @@ export function claimMissionsBonus(s) {
 }
 export const missionsToClaim = (s) => s.missions.list.filter((x) => !x.claimed && missionProg(s, x.key) >= missionOf(x.key).goal).length + (!s.missions.bonus && s.missions.list.every((x) => x.claimed) ? 1 : 0);
 
-// Niveaux : ajoute l'XP d'une partie et renvoie les niveaux gagnés (avec leurs pièces)
-export function addXp(s, cols, game = true) {
-  s.xp += cols + (game ? XP_PER_GAME : 0);
+// Niveaux : ajoute de l'XP (défi réussi, palier atteint) et renvoie les niveaux gagnés (avec leurs pièces)
+export function addXp(s, xp = 0) {
+  s.xp += xp;
   const ups = [];
   while (s.xp >= xpToNext(s.level)) {
     s.xp -= xpToNext(s.level); s.level++;

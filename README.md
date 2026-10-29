@@ -11,7 +11,7 @@ Le jeu vient de l'appli de coloc « La Kaz » (dépôt [rulazyx/COLOCATION](http
 - **Oiseaux** : les 14 de La Kaz plus 8 nouveaux (Pirate, Père Noël, Zombie, Robot, Astronaute, Fantôme, Licorne, Phénix).
 - **Repartir** : une pub permet de repartir au même score, une fois par partie.
 - **Défis du jour** : 3 défis tirés chaque jour qui rapportent des pièces, plus un coffre quand les 3 sont réussis.
-- **Profil et niveaux** : chaque partie rapporte de l'XP (1 par colonne + 3). Les niveaux donnent des pièces, des grades (Oisillon, Moineau… Légende) et des cadres autour de l'oiseau. Le profil regroupe pseudo, oiseau, cadre, grade, record, support et signalement de bugs (table `jc_feedback`).
+- **Profil et niveaux** : l'XP vient des défis du jour et des paliers de décor atteints (barre d'XP à côté des pièces). Les niveaux donnent des pièces, des grades (Oisillon, Moineau… Légende) et des cadres autour de l'oiseau. Le profil regroupe pseudo, oiseau, cadre, grade, record, support et signalement de bugs (table `jc_feedback`).
 - **Amis** : on ajoute un ami par son pseudo et on compare les records.
 - **Pseudo et classement mondial** : le meilleur score part en ligne dès qu'il y a du réseau (Supabase, voir plus bas).
 
