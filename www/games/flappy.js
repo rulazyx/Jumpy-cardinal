@@ -243,8 +243,6 @@ export function draw(ctx, g, frame, skin = BASE) {
       ctx.fillStyle = th.p3; ctx.fillRect(p.x + PIPE_W - 10, y0, 10, y1 - y0);
       ctx.fillStyle = th.p4; ctx.fillRect(p.x - 4, cap, PIPE_W + 8, 16);
       ctx.fillStyle = th.p5; ctx.fillRect(p.x - 4, cap + (cap === p.top - 16 ? 10 : 0), PIPE_W + 8, 6);
-      ctx.strokeStyle = 'rgba(0,0,0,.28)'; ctx.lineWidth = 1.6; ctx.strokeRect(p.x, y0, PIPE_W, y1 - y0); ctx.strokeRect(p.x - 4, cap, PIPE_W + 8, 16);   // contour façon dessin animé
-      ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(p.x - 2, cap + 2, PIPE_W + 4, 2);
       if (th.ruin > 0.5 && th.hell < 0.5) {   // pierre fissurée
         ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.lineWidth = 1.5; ctx.beginPath(); const cy0 = y0 + ((p.x * 7) % 40) + 20; ctx.moveTo(p.x + 8, cy0); ctx.lineTo(p.x + 20, cy0 + 12); ctx.lineTo(p.x + 14, cy0 + 24); ctx.lineTo(p.x + 30, cy0 + 40); ctx.stroke();
       }
