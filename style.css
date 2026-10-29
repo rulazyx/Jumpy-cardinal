@@ -153,12 +153,33 @@ textarea { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius:
 
 /* Intro : logo RZX Studio sur fond blanc (apparaît, se resserre, éclate), puis le ciel du jeu avec l'oiseau et le nom */
 .gsplash.intro { animation: none; background: #fff; overflow: hidden; }
-.gsplash.intro::before { content: ""; position: absolute; inset: 0; background: linear-gradient(#7ad0ff, #bfeaff); opacity: 0; transition: opacity .6s ease; }
-.gsplash.intro.game::before { opacity: 1; }
+.gsplash.intro::before { content: ""; position: absolute; inset: 0; background: linear-gradient(#7ad0ff, #bfeaff); clip-path: circle(0% at 50% 50%); transition: clip-path .55s cubic-bezier(.2,.8,.3,1); }
+.gsplash.intro.game::before { clip-path: circle(80% at 50% 50%); }   /* le ciel du jeu s'ouvre depuis l'endroit où le ballon a éclaté */
 .gsplash.intro.out { opacity: 0; transition: opacity .3s ease; }
-.rzx { position: absolute; width: min(72vw, 420px); animation: rzxin 1.05s cubic-bezier(.3,1.3,.5,1) both; }
+.rzx { position: absolute; width: min(60vw, 360px); animation: rzxin 1.75s linear both; }
 .rzx img, .shard img { display: block; width: 100%; height: auto; }
-@keyframes rzxin { 0% { transform: scale(.4); opacity: 0; } 35% { transform: scale(1.06); opacity: 1; } 55% { transform: scale(1); } 80% { transform: scale(1.02); } 100% { transform: scale(.62); } }
+/* Gonfle comme un ballon : 3 coups de pompe (chacun dépasse puis se tasse), le 3e tremble avant d'éclater */
+@keyframes rzxin {
+  0% { transform: scale(.55); opacity: 0; }
+  10% { transform: scale(.7); opacity: 1; }
+  20% { transform: scale(.7); }
+  27% { transform: scale(.9, .86); animation-timing-function: ease-out; }
+  32% { transform: scale(.83, .85); }
+  36% { transform: scale(.85); }
+  46% { transform: scale(.85); }
+  53% { transform: scale(1.06, 1.01); animation-timing-function: ease-out; }
+  58% { transform: scale(.99, 1.01); }
+  62% { transform: scale(1); }
+  72% { transform: scale(1); }
+  80% { transform: scale(1.22, 1.16); animation-timing-function: ease-out; }
+  84% { transform: scale(1.18, 1.2) rotate(-1.5deg); }
+  88% { transform: scale(1.22, 1.17) rotate(1.5deg); }
+  92% { transform: scale(1.2, 1.22) rotate(-1deg); }
+  96% { transform: scale(1.26, 1.22) rotate(1deg); }
+  100% { transform: scale(1.32); }
+}
+.popring { position: absolute; z-index: 3; left: 50%; top: 50%; width: 40px; height: 40px; margin: -20px; border-radius: 50%; border: 10px solid #111; pointer-events: none; animation: popring .5s cubic-bezier(.1,.8,.3,1) forwards; }
+@keyframes popring { from { transform: scale(.4); opacity: .9; } to { transform: scale(14); opacity: 0; border-width: 1px; } }
 .shard { position: fixed; z-index: 2; pointer-events: none; will-change: transform, opacity; }
 .gs-game { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; opacity: 0; transform: scale(.85); }
 .gsplash.intro.game .gs-game { opacity: 1; transform: none; transition: opacity .45s ease .15s, transform .5s cubic-bezier(.3,1.4,.5,1) .15s; }
