@@ -93,8 +93,8 @@ input { width: 100%; padding: 14px; border: 2px solid #e5e7eb; border-radius: 12
 .decors li span { display: inline-flex; align-items: center; gap: 3px; font-size: 13px; }
 .decors li.seen { background: #ecfdf5; color: #1b1d22; }
 
-.toast { position: fixed; z-index: 30; left: 50%; top: calc(env(safe-area-inset-top) + 70px); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; padding: 10px 20px; border-radius: 16px; background: rgba(20,20,28,.85); color: #fff; animation: tin .35s cubic-bezier(.2,1.4,.4,1); pointer-events: none; text-align: center; }
-.toast b { font: 400 22px 'Lilita One', system-ui, sans-serif; } .toast span { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; }
+.toast { position: fixed; z-index: 30; left: 50%; top: max(calc(env(safe-area-inset-top) + 70px), 22dvh); transform: translateX(-50%); width: max-content; max-width: calc(100vw - 32px); box-sizing: border-box; display: flex; flex-direction: column; align-items: center; padding: 10px 20px; border-radius: 16px; background: rgba(20,20,28,.85); color: #fff; animation: tin .35s cubic-bezier(.2,1.4,.4,1); pointer-events: none; text-align: center; }
+.toast b { font: 400 22px 'Lilita One', system-ui, sans-serif; } .toast span { display: block; margin-top: 2px; font-size: 14px; line-height: 20px; text-wrap: balance; } .toast span svg { vertical-align: -4px; margin: 0 1px; }   /* largeur = contenu (plus coupée à 50 % de l'écran) ; sous le score */
 @keyframes tin { from { transform: translate(-50%, -20px); opacity: 0; } }
 
 .adsim { position: fixed; inset: 0; z-index: 50; display: grid; place-items: center; background: #111; padding: 16px; }
