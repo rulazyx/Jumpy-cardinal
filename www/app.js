@@ -79,6 +79,7 @@ function gameOver(score) {
   S.track(s, 'cols', score - run.counted); run.counted = score;
   S.track(s, 'best', score); S.track(s, 'flaps', run.flaps); run.flaps = 0;
   if (score > s.best) { s.best = score; s.unsent = score; run.record = true; }
+  if (!s.pseudo && !s.pseudoAsked) { s.pseudoAsked = true; sheet = { type: 'pseudo', first: true }; }   // le pseudo se choisit après la première partie
   S.save(s);
   LB.flush(s);
   render();
@@ -260,7 +261,7 @@ function sheetHTML() {
         ${sheet.done ? `<p class="sub">${esc(sheet.done)}</p>` : `<p class="sub">Ton pseudo et ton score seront effacés du classement mondial. Tes pièces et tes oiseaux restent sur ton téléphone.</p>
         ${sheet.err ? `<p class="err">${esc(sheet.err)}</p>` : ''}<button class="gh-btn go" data-a="delete-ok">Supprimer</button><button class="gh-btn" data-a="close">Annuler</button>`}</div>`;
     case 'pseudo':
-      return `<div class="panel center">${s.pseudo ? close : ''}<h2>Ton pseudo</h2><p class="sub">Il s'affiche dans le classement mondial (3 à 16 caractères).</p>
+      return `<div class="panel center">${s.pseudo ? close : ''}<h2>${sheet.first ? 'Bien joué !' : 'Ton pseudo'}</h2><p class="sub">${sheet.first ? `Tu as fait ${game.score}. Choisis un pseudo pour apparaître dans le classement mondial.` : 'Il s\'affiche dans le classement mondial (3 à 16 caractères).'}</p>
         <form data-f="pseudo"><input name="p" maxlength="16" minlength="3" required pattern="[A-Za-z0-9À-ÿ_ .\\-]{3,16}" value="${esc(s.pseudo)}" placeholder="Pseudo" autocomplete="off">
         ${sheet.err ? `<p class="err">${esc(sheet.err)}</p>` : ''}<button class="gh-btn go">Valider</button></form>
         ${s.pseudo ? '' : '<button class="link" data-a="close">Plus tard</button>'}
@@ -429,7 +430,7 @@ ui.addEventListener('submit', async (e) => {
 });
 window.addEventListener('online', () => LB.flush(s));
 
-// ---------- Démarrage : logo RZX Studio (apparaît, se resserre, éclate), puis écran de chargement du jeu, puis menu ----------
+// ---------- Démarrage : logo RZX Studio (gonfle comme un ballon en 3 coups, puis éclate), puis écran de chargement du jeu, puis menu ----------
 function intro() {
   const el = document.createElement('div');
   el.className = 'gsplash intro';
@@ -441,8 +442,8 @@ function intro() {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) { el.classList.add('game'); setTimeout(end, 1400); return; }
   const box = el.querySelector('.rzx'), img = box.querySelector('img');
   const go = () => setTimeout(() => {
-    // Éclats : le logo est découpé en triangles (grille déformée) qui partent depuis le centre en tournant
-    const r = box.getBoundingClientRect(), cols = 5, rows = 3, pt = [];
+    // Le ballon éclate : morceaux (triangles d'une grille déformée) projetés depuis le centre, onde de choc, et le ciel du jeu s'ouvre en cercle
+    const r = box.getBoundingClientRect(), cols = 4, rows = 3, pt = [];
     for (let y = 0; y <= rows; y++) for (let x = 0; x <= cols; x++) {
       const edge = x === 0 || y === 0 || x === cols || y === rows;
       pt.push([(x + (edge ? 0 : (Math.random() - 0.5) * 0.7)) / cols * 100, (y + (edge ? 0 : (Math.random() - 0.5) * 0.7)) / rows * 100]);
@@ -457,19 +458,21 @@ function intro() {
       Object.assign(sh.style, { left: `${r.left}px`, top: `${r.top}px`, width: `${r.width}px`, height: `${r.height}px`, clipPath: `polygon(${t.map(([x, y]) => `${x}% ${y}%`).join(',')})` });
       sh.innerHTML = `<img src="img/rzx.png" alt="">`;
       el.appendChild(sh);
-      const cx = (t[0][0] + t[1][0] + t[2][0]) / 3 - 50, cy = (t[0][1] + t[1][1] + t[2][1]) / 3 - 50, k = 6 + Math.random() * 6;
-      sh.animate([{ transform: 'none', opacity: 1 }, { transform: `translate(${cx * k}px, ${cy * k * 1.6 + 120}px) rotate(${(Math.random() - 0.5) * 540}deg) scale(.6)`, opacity: 0 }],
-        { duration: 750 + Math.random() * 250, easing: 'cubic-bezier(.15,.7,.4,1)', fill: 'forwards' });
+      const cx = (t[0][0] + t[1][0] + t[2][0]) / 3 - 50, cy = (t[0][1] + t[1][1] + t[2][1]) / 3 - 50, k = 9 + Math.random() * 7;
+      sh.animate([{ transform: 'none', opacity: 1 }, { transform: `translate(${cx * k * 0.6}px, ${cy * k * 0.9}px) rotate(${(Math.random() - 0.5) * 300}deg) scale(.8)`, opacity: 1, offset: 0.35 },
+        { transform: `translate(${cx * k}px, ${cy * k * 1.4 + 260}px) rotate(${(Math.random() - 0.5) * 720}deg) scale(.5)`, opacity: 0 }],
+        { duration: 650 + Math.random() * 250, easing: 'cubic-bezier(.2,.9,.5,1)', fill: 'forwards' });
     }
+    const ring = document.createElement('div'); ring.className = 'popring'; el.appendChild(ring);
+    navigator.vibrate?.(30);
     box.remove();
     el.classList.add('game');   // le fond passe au ciel du jeu, l'oiseau et le nom arrivent
-    setTimeout(end, 1500);
-  }, 1050);
+    setTimeout(end, 1600);
+  }, 1750);
   img.decode ? img.decode().then(go, go) : go();
 }
 intro();
 newRun();
-if (!s.pseudo) sheet = { type: 'pseudo' };
 render();
 game.resume();   // l'oiseau flotte derrière le menu
 LB.flush(s);
