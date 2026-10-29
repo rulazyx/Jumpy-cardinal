@@ -1,7 +1,7 @@
 // Jumpy Cardinal : menus, pièces, boîte mystère, défis du jour et classement autour du jeu (games/flappy.js)
 import { mount, birdPreview, STAGE_AT } from './games/flappy.js';
 import { logoArt, gIcon } from './gameart.js';
-import { SHOP, BIRD_CRATE, birdRarity, STAGE_NAMES, STAGE_COINS, MISSIONS_BONUS, FRAMES, GRADES, gradeOf, xpToNext } from './config.js';
+import { SHOP, BIRD_CRATE, birdRarity, STAGE_NAMES, STAGE_COINS, MISSIONS_BONUS, FRAMES, GRADES, gradeOf, xpToNext, STAGE_XP } from './config.js';
 import * as S from './store.js';
 import { showRewarded, privacyOptions } from './ads.js';
 import { badPseudo } from './moderation.js';
@@ -35,16 +35,16 @@ const SUPPORT_FAQ = [
   ['Ma partie est-elle sauvegardée ?', 'Oui, sur ton téléphone. Pièces, oiseaux, niveau et défis restent même sans connexion. Attention : désinstaller l\'appli les efface.'],
   ['Comment gagner des oiseaux ?', 'Avec la boîte mystère : 150 pièces, ou une boîte gratuite par jour contre une pub.'],
   ['Comment gagner des pièces ?', 'En atteignant de nouveaux décors pendant une partie, en réussissant les défis du jour et en montant de niveau.'],
-  ['Comment débloquer des cadres ?', 'En montant de niveau : chaque partie rapporte de l\'XP (1 par colonne passée).'],
+  ['Comment débloquer des cadres ?', 'En montant de niveau. L\'XP se gagne avec les défis du jour et en atteignant de nouveaux décors pendant une partie.'],
   ['Mon score n\'apparaît pas au classement', 'Il part dès que tu as du réseau. Vérifie que tu as choisi un pseudo.'],
 ];
-const reward = (r) => (r.coins ? `+${r.coins} ${COIN}` : '');
+const reward = (r) => [r.coins ? `+${r.coins} ${COIN}` : '', r.xp ? `+${r.xp} XP` : ''].filter(Boolean).join(' · ');
 
 const APP_VERSION = '1.0.0';
 const s = S.load();
 const root = document.getElementById('game');
 const ui = document.getElementById('ui');
-let mode = 'home', run = null, sheet = null;
+let mode = 'home', run = null, sheet = null, sky = '#7ec8e3';
 
 // ---------- Jeu ----------
 const game = mount(root, {
@@ -56,15 +56,16 @@ const game = mount(root, {
     return true;
   },
   onStage(i) {
-    const c = STAGE_COINS[i] ?? 0;
-    s.coins += c; run.coins += c; S.save(s);
-    toast(`<b>${esc(STAGE_NAMES[i])}</b><span>Palier ${STAGE_AT[i]} · +${c} ${COIN}</span>`);
+    const c = STAGE_COINS[i] ?? 0, xp = STAGE_XP[i] ?? 0;
+    s.coins += c; run.coins += c; run.xp += xp; run.ups.push(...S.addXp(s, xp));   // les passages de niveau s'affichent en fin de partie
+    toast(`<b>${esc(STAGE_NAMES[i])}</b><span>Palier ${STAGE_AT[i]} · ${reward({ coins: c, xp })}</span>`);
   },
   onOver({ score }) { gameOver(score); },
+  onSky(c) { sky = c; paintBars(); },
 });
 game.pause();
 
-function newRun() { run = { started: false, flaps: 0, coins: 0, counted: 0, xp: 0, adUsed: false, record: false }; }
+function newRun() { run = { started: false, flaps: 0, coins: 0, counted: 0, xp: 0, ups: [], adUsed: false, record: false }; }
 
 function play() {
   sheet = null; mode = 'play'; newRun();
@@ -73,15 +74,17 @@ function play() {
 
 function gameOver(score) {
   mode = 'over';
-  const ups = S.addXp(s, score - run.counted, !run.adUsed);   // après « repartir », seules les nouvelles colonnes comptent
-  run.xp += score - run.counted + (run.adUsed ? 0 : 3);
   S.track(s, 'cols', score - run.counted); run.counted = score;
   S.track(s, 'best', score); S.track(s, 'flaps', run.flaps); run.flaps = 0;
   if (score > s.best) { s.best = score; s.unsent = score; run.record = true; }
   S.save(s);
   LB.flush(s);
   render();
-  for (const u of ups) toast(`<b>Niveau ${u.level} !</b><span>${reward(u)}${FRAMES.find((f) => f.lvl === u.level) ? ' · nouveau cadre' : ''}${GRADES.find((g) => g.lvl === u.level) ? ` · grade ${esc(gradeOf(u.level).name)}` : ''}</span>`);
+  levelToasts(run.ups.splice(0));
+}
+
+function levelToasts(ups, wait = 0) {   // un toast par niveau gagné, les uns après les autres
+  ups.forEach((u, k) => setTimeout(() => toast(`<b>Niveau ${u.level} !</b><span>${reward(u)}${FRAMES.find((f) => f.lvl === u.level) ? ' · nouveau cadre' : ''}${GRADES.find((g) => g.lvl === u.level) ? ` · grade ${esc(gradeOf(u.level).name)}` : ''}</span>`), wait + k * 2700));
 }
 
 function revive() {
@@ -94,6 +97,7 @@ function revive() {
 function topbar() {
   return `<div class="topbar">
     <span class="pill coins">${COIN}<b>${s.coins}</b></span>
+    <button class="pill xpbar" data-a="profile" aria-label="Niveau ${s.level}, ${s.xp} sur ${xpToNext(s.level)} XP">${lvlBadge(s.level)}<span class="xpb"><i style="width:${Math.min(100, (s.xp / xpToNext(s.level)) * 100)}%"></i><small>${s.xp} / ${xpToNext(s.level)} XP</small></span></button>
     <button class="round" data-a="friends" aria-label="Amis">${FRIENDS(30)}</button>
     <button class="round prof" data-a="profile" aria-label="Profil et paramètres">${avatar(s.bird, s.frame, 46)}${lvlBadge(s.level)}</button>
   </div>`;
@@ -119,7 +123,7 @@ function overHTML() {
   return `<div class="panel over">
     <h2>${run.record ? 'Nouveau record !' : 'Partie terminée'}</h2>
     <p class="big-score">${sc}</p>
-    <p class="sub">Record : ${s.best}${run.coins ? ` · +${run.coins} ${COIN}` : ''} · +${run.xp} XP</p>
+    <p class="sub">Record : ${s.best}${run.coins ? ` · +${run.coins} ${COIN}` : ''} ${run.xp ? ` · +${run.xp} XP` : ''}</p>
     ${canAd ? `<button class="gh-btn ad" data-a="rev-ad">▶ Repartir avec une pub</button>` : ''}
     <div class="two"><button class="gh-btn" data-a="play">${gIcon('replay')}Rejouer</button><button class="gh-btn" data-a="home">${gIcon('home')}Menu</button></div>
   </div>`;
@@ -254,7 +258,20 @@ function privacyLinks() {
   return `<p class="legal"><a href="confidentialite.html" target="_blank" rel="noopener">Confidentialité</a> · <button class="link" data-a="ads-privacy">Choix pour les pubs</button>${LB.enabled() && s.pseudo ? ' · <button class="link" data-a="delete">Supprimer mes données</button>' : ''}</p>`;
 }
 
+// Barre d'état du téléphone (heure, batterie) : même couleur que le haut du ciel, assombrie ou éclaircie comme le menu affiché
+const themeMeta = document.querySelector('meta[name=theme-color]');
+function mix(col, to, k) {   // col : « #rrggbb » ou « rgb(r,g,b) »
+  const n = col.startsWith('#') ? [1, 3, 5].map((i) => parseInt(col.slice(i, i + 2), 16)) : col.match(/\d+/g).slice(0, 3).map(Number), t = to === 'black' ? 0 : 255;
+  return `rgb(${n.map((v) => Math.round(v + (t - v) * k)).join(',')})`;
+}
+function paintBars() {
+  let c = mode === 'over' ? mix(sky, 'black', 0.25) : mode === 'home' ? mix(sky, 'white', 0.12) : mix(sky, 'white', 0);
+  if (sheet) c = mix(c, 'black', 0.4);
+  document.documentElement.style.background = c; document.body.style.background = c; themeMeta?.setAttribute('content', c);
+}
+
 function render() {
+  paintBars();
   root.classList.toggle('dim', mode !== 'play');
   ui.className = `ui m-${mode}`;
   game.menu(mode === 'home');
@@ -307,8 +324,8 @@ async function act(a, el) {
       setTimeout(() => { sheet = { type: 'crate', phase: 'won', bird: b }; render(); }, 1300);
       break;
     }
-    case 'claim': { const r = S.claimMission(s, el.dataset.k); if (r) toast(`<b>Défi réussi</b><span>${reward(r)}</span>`); render(); break; }
-    case 'claim-bonus': { const r = S.claimMissionsBonus(s); if (r) toast(`<b>Coffre ouvert</b><span>${reward(r)}</span>`); render(); break; }
+    case 'claim': { const r = S.claimMission(s, el.dataset.k); if (r) { toast(`<b>Défi réussi</b><span>${reward(r)}</span>`); levelToasts(S.addXp(s, r.xp), 2600); } render(); break; }
+    case 'claim-bonus': { const r = S.claimMissionsBonus(s); if (r) { toast(`<b>Coffre ouvert</b><span>${reward(r)}</span>`); levelToasts(S.addXp(s, r.xp), 2600); } render(); break; }
     case 'player': {
       const from = el.dataset.from, rows = sheet?.rows ?? (from === 'friends' ? s.friends : null);
       sheet = { type: 'player', pseudo: el.dataset.k, row: rows?.[+el.dataset.i], back: { type: from, rows: sheet?.rows } }; render(); break;

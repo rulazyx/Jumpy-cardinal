@@ -35,21 +35,21 @@ export const STAGE_COINS = [0, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 
 
 // Défis du jour : 3 tirés au hasard chaque jour ; les 3 réussis = coffre bonus
 export const MISSIONS = [
-  { key: 'games3',   text: 'Jouer 3 parties',              goal: 3,   stat: 'games',   reward: { coins: 20 } },
-  { key: 'games8',   text: 'Jouer 8 parties',              goal: 8,   stat: 'games',   reward: { coins: 50 } },
-  { key: 'cols30',   text: 'Passer 30 colonnes au total',  goal: 30,  stat: 'cols',    reward: { coins: 25 } },
-  { key: 'cols100',  text: 'Passer 100 colonnes au total', goal: 100, stat: 'cols',    reward: { coins: 50 } },
-  { key: 'run15',    text: 'Atteindre 15 en une partie',   goal: 15,  stat: 'best',    reward: { coins: 30 } },
-  { key: 'run30',    text: 'Atteindre 30 en une partie',   goal: 30,  stat: 'best',    reward: { coins: 50 } },
-  { key: 'run50',    text: 'Atteindre 50 en une partie',   goal: 50,  stat: 'best',    reward: { coins: 80 } },
-  { key: 'flaps200', text: 'Battre des ailes 200 fois',    goal: 200, stat: 'flaps',   reward: { coins: 20 } },
-  { key: 'box1',     text: 'Ouvrir une boîte mystère',     goal: 1,   stat: 'boxes',   reward: { coins: 40 } },
-  { key: 'revive1',  text: 'Repartir une fois',            goal: 1,   stat: 'revives', reward: { coins: 30 } },
+  { key: 'games3',   text: 'Jouer 3 parties',              goal: 3,   stat: 'games',   reward: { coins: 20, xp: 20 } },
+  { key: 'games8',   text: 'Jouer 8 parties',              goal: 8,   stat: 'games',   reward: { coins: 50, xp: 50 } },
+  { key: 'cols30',   text: 'Passer 30 colonnes au total',  goal: 30,  stat: 'cols',    reward: { coins: 25, xp: 25 } },
+  { key: 'cols100',  text: 'Passer 100 colonnes au total', goal: 100, stat: 'cols',    reward: { coins: 50, xp: 50 } },
+  { key: 'run15',    text: 'Atteindre 15 en une partie',   goal: 15,  stat: 'best',    reward: { coins: 30, xp: 30 } },
+  { key: 'run30',    text: 'Atteindre 30 en une partie',   goal: 30,  stat: 'best',    reward: { coins: 50, xp: 50 } },
+  { key: 'run50',    text: 'Atteindre 50 en une partie',   goal: 50,  stat: 'best',    reward: { coins: 80, xp: 80 } },
+  { key: 'flaps200', text: 'Battre des ailes 200 fois',    goal: 200, stat: 'flaps',   reward: { coins: 20, xp: 20 } },
+  { key: 'box1',     text: 'Ouvrir une boîte mystère',     goal: 1,   stat: 'boxes',   reward: { coins: 40, xp: 40 } },
+  { key: 'revive1',  text: 'Repartir une fois',            goal: 1,   stat: 'revives', reward: { coins: 30, xp: 30 } },
 ];
-export const MISSIONS_BONUS = { coins: 100 };
+export const MISSIONS_BONUS = { coins: 100, xp: 100 };
 
-// Niveaux : chaque partie rapporte de l'XP (1 par colonne passée + 3 pour avoir joué). Passer du niveau n au n+1 demande 30 + 15 × n XP.
-export const XP_PER_GAME = 3;
+// Niveaux : l'XP vient des défis du jour (voir MISSIONS) et des paliers de décor atteints en partie (STAGE_XP). Passer du niveau n au n+1 demande 30 + 15 × n XP.
+export const STAGE_XP = STAGE_COINS;
 export const xpToNext = (lvl) => 30 + 15 * lvl;
 export const levelReward = (lvl) => ({ coins: 20 + 5 * lvl });   // pièces gagnées en atteignant le niveau lvl
 

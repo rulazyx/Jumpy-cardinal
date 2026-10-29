@@ -23,7 +23,7 @@ body:has(.ui.m-home) .gmute { display: none; }   /* le bouton son reste en parti
 .pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 0; border-radius: 99px; background: rgba(255,255,255,.92); box-shadow: 0 2px 8px rgba(0,0,0,.12); font-size: 15px; }
 .pill small { color: #6b7280; font-size: 11px; }
 .pill.name { font-weight: 700; min-width: 0; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pill.coins { margin-right: auto; flex-shrink: 0; font-weight: 800; font-size: 17px; }
+.pill.coins { flex-shrink: 0; font-weight: 800; font-size: 17px; }
 .round { position: relative; flex-shrink: 0; width: 46px; height: 46px; padding: 0; border: 0; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.93); box-shadow: 0 1px 6px rgba(0,0,0,.2); }
 .round:active { transform: scale(.94); }
 .round .dot { top: -4px; right: -4px; }
@@ -169,3 +169,11 @@ textarea { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius:
 .row23 .gh-btn.big { margin-top: 0; max-width: none; flex: 2; padding-inline: 10px; font-size: 20px; }
 .row23 .gh-btn.big.side { flex: 1; padding-inline: 0; }
 .home > .gh-btn.go.big { max-width: 320px; }
+.row23 .gh-btn.big { flex: 3; } .row23 .gh-btn.big.side { flex: 1; }   /* 3/4 - 1/4 */
+/* Barre d'XP à côté des pièces : badge de niveau + jauge */
+.pill.xpbar { margin-right: auto; gap: 8px; padding: 5px 10px 5px 6px; border: 0; min-width: 0; flex: 0 1 140px; }
+.pill.xpbar .lvl { position: static; flex-shrink: 0; border-color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+.xpb { position: relative; flex: 1; min-width: 48px; height: 16px; border-radius: 8px; background: #e2e8f0; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,.15); }
+.xpb i { position: absolute; inset: 0 auto 0 0; border-radius: 8px; background: linear-gradient(#7cc4ff, #2f7fe6); box-shadow: inset 0 -3px 0 rgba(0,0,0,.12), inset 0 2px 0 rgba(255,255,255,.45); transition: width .5s ease; }
+.xpb small { position: relative; display: block; text-align: center; font: 800 10px/16px system-ui, sans-serif; color: #0f2a4a; text-shadow: 0 0 3px #fff, 0 0 3px #fff; }
+@media (max-width: 380px) { .pill.xpbar { flex-basis: 110px; } }
