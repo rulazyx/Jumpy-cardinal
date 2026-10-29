@@ -50,10 +50,16 @@ Tout est sauvegardé sur l'appareil (`localStorage`), sans compte.
 - **Confidentialité** : `www/confidentialite.html`. App Store Connect demande une URL publique (par exemple GitHub Pages sur ce dépôt). Remplacer l'adresse de contact à compléter.
 - **Nom** : ne jamais écrire « Flappy » dans le nom, la description ou les mots-clés de la fiche (risque de rejet pour copie, règles 4.1 / 4.3).
 
-### Réglages iOS à ajouter dans `ios/App/App/Info.plist`
+## Appli iOS / Android (Capacitor 8)
 
-- `NSUserTrackingUsageDescription` : « Ton identifiant sert seulement à afficher des pubs plus adaptées. Tu peux refuser, les pubs resteront disponibles. »
-- `GADApplicationIdentifier` : l'ID d'appli AdMob (`ca-app-pub-…~…`).
-- `SKAdNetworkItems` : la liste fournie par Google dans la doc AdMob iOS.
+- `capacitor.config.json` : identifiant `fr.jumpycardinal.app`, le web vient de `www/`. Dossiers natifs `ios/` (Swift Package Manager, pas de CocoaPods) et `android/` (cible API 36).
+- Pubs : `@capacitor-community/admob` 8. `Info.plist` contient déjà `GADApplicationIdentifier`, `NSUserTrackingUsageDescription`, la liste `SKAdNetworkItems` de Google et `ITSAppUsesNonExemptEncryption = false`. Les identifiants sont ceux de test de Google : `node tools/admob-ids.cjs <appli Android> <bloc Android> <appli iOS> <bloc iOS>` met les vrais partout et coupe le mode test.
+- Icônes et écrans de lancement : `npm run assets` (sources dans `assets/`, générées par `tools/native-assets.cjs`).
+- Fiches des stores : `store/` (icônes 512 et 1024, bannière Google, captures). Captures regénérées par `node tools/store-shots.cjs`.
+- Signature Android : `android/keystore.properties` (jamais commité), puis `cd android && ./gradlew bundleRelease`.
 
-Le plugin `@capacitor-community/admob` n'accepte pas encore Capacitor 8 : installer Capacitor 7 (`npm i @capacitor/core@7 @capacitor/cli@7 @capacitor/ios@7 @capacitor/android@7`) ou attendre sa mise à jour. Sans le plugin, les pubs restent simulées.
+```bash
+npm install
+npx cap sync        # après chaque changement dans www/
+npx cap open ios    # ou: npx cap open android
+```
