@@ -203,3 +203,9 @@ textarea { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius:
 .sw { position: relative; width: 46px; height: 28px; border-radius: 14px; background: #cbd5e1; transition: background .2s; } .sw i { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: left .2s; }
 .sw.on { background: #22c55e; } .sw.on i { left: 21px; }
 .gh-btn.big.wide { width: 100%; }
+/* En partie : bouton pause (deux barres, sans fond) à la place du bouton son, qui passe dans le menu pause */
+.gmute { display: none !important; }
+.pausebtn { position: absolute; top: calc(env(safe-area-inset-top) + 8px); right: max(10px, env(safe-area-inset-right)); width: 48px; height: 48px; padding: 0; border: 0; background: none; display: flex; align-items: center; justify-content: center; gap: 7px; filter: drop-shadow(0 2px 2px rgba(0,40,80,.35)); }
+.pausebtn i { display: block; width: 8px; height: 26px; border-radius: 3px; background: #fff; }
+.pausebtn:active { transform: scale(.9); }
+.setlist.wide { width: 100%; }
