@@ -26,7 +26,7 @@ Tout est sauvegardé sur l'appareil (`localStorage`), sans compte.
   - `config.js` : oiseaux, pièces par décor, réglages des vies, défis et bonus.
   - `ads.js` : pubs récompensées (AdMob dans l'appli, pub simulée de 5 s dans le navigateur).
   - `leaderboard.js` + `online.js` : classement en ligne (désactivé tant que `online.js` est vide).
-- `supabase/schema.sql` : base du classement (table `players`, fonctions `sync_player` et `top_scores`).
+- `supabase/schema.sql` : base du classement (table `jc_players`, fonctions `jc_sync_player` et `jc_top_scores`, préfixées pour pouvoir partager une base existante).
 
 ## Lancer
 

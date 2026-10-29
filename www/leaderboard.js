@@ -19,10 +19,10 @@ async function rpc(fn, body) {
 // Envoie le pseudo et le meilleur score ; renvoie le rang du joueur. L'erreur « pseudo_pris » remonte telle quelle.
 export async function sync(s) {
   if (!enabled() || !s.pseudo) return null;
-  const rank = await rpc('sync_player', { p_id: s.playerId, p_secret: s.secret, p_pseudo: s.pseudo, p_score: s.best });
+  const rank = await rpc('jc_sync_player', { p_id: s.playerId, p_secret: s.secret, p_pseudo: s.pseudo, p_score: s.best });
   s.unsent = null; s.rank = rank; save(s);
   return rank;
 }
 export async function flush(s) { if (s.unsent != null && navigator.onLine !== false) { try { await sync(s); } catch { /* on réessaiera */ } } }
 
-export const top = (limit = 50) => rpc('top_scores', { p_limit: limit });
+export const top = (limit = 50) => rpc('jc_top_scores', { p_limit: limit });
