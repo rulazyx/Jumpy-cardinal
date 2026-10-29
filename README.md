@@ -24,7 +24,8 @@ Tout est sauvegardé sur l'appareil (`localStorage`), sans compte.
   - `app.js` : menus, pièces, boîte mystère, défis du jour, classement.
   - `store.js` : sauvegarde et règles (défis, boîte).
   - `config.js` : oiseaux, pièces par décor, défis du jour.
-  - `fonts/LilitaOne.woff2` : police cartoon du titre (licence SIL OFL), embarquée pour marcher hors ligne.
+  - `fonts/LilitaOne.woff2` : police cartoon des scores et fenêtres ; `fonts/GlacialIndifference-Bold.woff2` : nom du jeu en capitales (licences SIL OFL), embarquées pour marcher hors ligne.
+  - `img/rzx.png` : logo RZX Studio de l'intro (il apparaît, se resserre et éclate), tiré de `design/rzx-studio.png`.
   - `icons/` : icône de l'appli (l'oiseau de La Kaz sur fond bleu), regénérée par `node tools/icons.cjs`.
   - `ads.js` : pubs récompensées (AdMob dans l'appli, pub simulée de 5 s dans le navigateur).
   - `leaderboard.js` + `online.js` : classement en ligne (désactivé tant que `online.js` est vide).
