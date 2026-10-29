@@ -88,7 +88,7 @@ function homeHTML() {
   <div class="home">
     <div class="logo"><div class="gl-bird">${birdImg(s.bird, 140)}</div><div class="gl-shadow"></div></div>
     <h1>Jumpy Cardinal</h1>
-    <p class="best">Meilleur score : <b>${s.best}</b>${s.rank ? ` · ${s.rank}<sup>e</sup> mondial` : ''}</p>
+    <p class="best">RECORD : <b>${s.best}</b>${s.rank ? ` · ${s.rank}<sup>e</sup> mondial` : ''}</p>
     <button class="gh-btn go big" data-a="play">${gIcon('play')}Jouer</button>
     <button class="gh-btn big crate" data-a="crate">${CRATE(30)}Boîte mystère${S.cratePool(s).length && s.adBoxDay !== S.dayOf() ? '<i class="dot">1</i>' : ''}</button>
   </div>`;
@@ -99,7 +99,7 @@ function overHTML() {
   return `<div class="panel over">
     <h2>${run.record ? 'Nouveau record !' : 'Partie terminée'}</h2>
     <p class="big-score">${sc}</p>
-    <p class="sub">Meilleur : ${s.best}${run.coins ? ` · +${run.coins} ${COIN}` : ''}</p>
+    <p class="sub">Record : ${s.best}${run.coins ? ` · +${run.coins} ${COIN}` : ''}</p>
     ${canAd ? `<button class="gh-btn ad" data-a="rev-ad">▶ Repartir avec une pub</button>` : ''}
     <div class="two"><button class="gh-btn" data-a="play">${gIcon('replay')}Rejouer</button><button class="gh-btn" data-a="home">${gIcon('home')}Menu</button></div>
   </div>`;
