@@ -26,3 +26,10 @@ export async function sync(s) {
 export async function flush(s) { if (s.unsent != null && navigator.onLine !== false) { try { await sync(s); } catch { /* on réessaiera */ } } }
 
 export const top = (limit = 50) => rpc('jc_top_scores', { p_limit: limit });
+
+// Signaler un pseudo choquant (masqué du classement après 3 signalements) et effacer ses propres données
+export async function report(s, pseudo) {
+  if (!s.pseudo) await sync(s).catch(() => {});   // il faut être inscrit au classement pour signaler
+  return rpc('jc_report', { p_id: s.playerId, p_secret: s.secret, p_pseudo: pseudo });
+}
+export const remove = (s) => rpc('jc_delete_player', { p_id: s.playerId, p_secret: s.secret });

@@ -85,6 +85,9 @@ input { width: 100%; padding: 14px; border: 2px solid #e5e7eb; border-radius: 12
 .board li { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 10px; background: #f8fafc; }
 .board li span { width: 28px; color: #6b7280; font-weight: 800; } .board li b { flex: 1; } .board li em { font-style: normal; font-weight: 900; }
 .board li:nth-child(1) { background: #fef3c7; } .board li.me { outline: 2px solid #ffc928; }
+.board li > button { all: unset; display: flex; gap: 10px; align-items: center; flex: 1; cursor: pointer; }
+.board li > button span { width: 28px; color: #6b7280; font-weight: 800; } .board li > button b { flex: 1; } .board li > button em { font-style: normal; font-weight: 900; }
+.legal { margin: 4px 0 0; font-size: 12px; color: #6b7280; text-align: center; } .legal a, .legal .link { color: #6b7280; font-size: 12px; padding: 0; }
 .decors li { display: flex; justify-content: space-between; gap: 8px; padding: 8px 10px; border-radius: 10px; background: #f1f5f9; color: #94a3b8; }
 .decors li span { display: inline-flex; align-items: center; gap: 3px; font-size: 13px; }
 .decors li.seen { background: #ecfdf5; color: #1b1d22; }
