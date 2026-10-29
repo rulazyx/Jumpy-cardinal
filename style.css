@@ -1,4 +1,5 @@
 /* Jumpy Cardinal. Styles du jeu et de l'écran de chargement repris de COLOCATION, menus ajoutés pour l'appli. */
+@font-face { font-family: 'Lilita One'; src: url('fonts/LilitaOne.woff2') format('woff2'); font-weight: 400; font-display: swap; }   /* police cartoon, embarquée pour marcher hors ligne (licence OFL) */
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; overflow: hidden; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
 body { background: linear-gradient(#7ad0ff, #bfeaff); color: #1b1d22; }
@@ -16,19 +17,21 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .ui > * { pointer-events: auto; }
 .ui.m-home { background: rgba(255,255,255,.12); }
 .ui.m-over { justify-content: center; background: rgba(0,0,0,.25); }
-.topbar { width: 100%; max-width: 480px; display: flex; gap: 8px; align-items: center; padding-right: 52px; flex-wrap: wrap; }
+.topbar { width: 100%; max-width: 480px; display: flex; gap: 8px; align-items: center; }
+body:has(.ui.m-home) .gmute { display: none; }   /* le bouton son reste en partie ; le menu garde la place pour les boutons ronds */
 .pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 0; border-radius: 99px; background: rgba(255,255,255,.92); box-shadow: 0 2px 8px rgba(0,0,0,.12); font-size: 15px; }
 .pill small { color: #6b7280; font-size: 11px; }
-.pill.name { margin-left: auto; font-weight: 700; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pill.name { font-weight: 700; min-width: 0; max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pill.coins { margin-left: auto; flex-shrink: 0; }
+.round { position: relative; flex-shrink: 0; width: 46px; height: 46px; padding: 0; border: 0; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.93); box-shadow: 0 1px 6px rgba(0,0,0,.2); }
+.round:active { transform: scale(.94); }
+.round .dot { top: -4px; right: -4px; }
+@media (max-width: 380px) { .round { width: 40px; height: 40px; } .round svg, .round img { width: 26px; height: 26px; } .topbar { gap: 6px; } }
 
 .home { flex: 1; width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; }
-.home h1 { margin: 0; font-size: clamp(30px, 9vw, 44px); font-weight: 900; color: #fff; text-shadow: 0 3px 0 #b91c1c, 0 6px 16px rgba(0,0,0,.25); letter-spacing: .02em; }
+.home h1 { margin: 0; font: 400 clamp(38px, 11vw, 56px)/1 'Lilita One', 'Chalkboard SE', 'Arial Rounded MT Bold', sans-serif; color: #fff; letter-spacing: .01em; }
 .best { margin: 0; padding: 4px 14px; border-radius: 99px; background: rgba(255,255,255,.85); font-size: 15px; }
 .logo { display: flex; flex-direction: column; align-items: center; }
-.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; margin-top: 6px; }
-.tile { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 92px; padding: 8px 4px; border: 0; border-radius: 18px; background: rgba(255,255,255,.93); box-shadow: 0 3px 10px rgba(0,0,0,.14); font-size: 13px; font-weight: 700; }
-.tile:active { transform: scale(.96); }
-.tile .ico { font-size: 34px; line-height: 44px; }
 .dot { position: absolute; top: 6px; right: 8px; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 10px; background: #ef4444; color: #fff; font: 800 12px/20px system-ui; font-style: normal; }
 .bimg { display: block; image-rendering: auto; }
 
@@ -37,7 +40,9 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .gh-btn:disabled { opacity: .45; }
 .gh-btn.go { background: #ffc928; }
 .gh-btn.ad { background: #22c55e; color: #fff; }
-.gh-btn.big { font-size: 22px; padding: 18px; max-width: 280px; box-shadow: 0 5px 0 #c99400; }
+.gh-btn.big { position: relative; font-size: 22px; padding: 18px; max-width: 280px; box-shadow: 0 5px 0 #c99400; }
+.gh-btn.big.crate { margin-top: 4px; }
+.gh-btn.big .dot { top: -6px; right: -6px; }
 .gh-btn.mini { width: auto; padding: 8px 12px; font-size: 14px; }
 .gh-btn small { font-weight: 500; opacity: .7; }
 
@@ -75,11 +80,6 @@ input { width: 100%; padding: 14px; border: 2px solid #e5e7eb; border-radius: 12
 .mission.ok { opacity: .6; } .mission.bonus { background: #fff8dc; }
 .bar { height: 8px; border-radius: 4px; background: #e5e7eb; overflow: hidden; } .bar i { display: block; height: 100%; background: #22c55e; border-radius: 4px; }
 .check { color: #16a34a; font-size: 22px; font-weight: 900; }
-.days { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 100%; }
-.day { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px; border-radius: 12px; background: #f1f5f9; font-size: 12px; font-weight: 700; }
-.day span { display: inline-flex; align-items: center; gap: 2px; flex-wrap: wrap; justify-content: center; }
-.day.got { background: #dcfce7; } .day.now { background: #ffc928; transform: scale(1.06); }
-.day:last-child { grid-column: span 2; background: linear-gradient(135deg, #fde68a, #fbbf24); }
 .won { margin: 0; font-weight: 800; display: inline-flex; gap: 4px; align-items: center; }
 .board, .decors { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
 .board li { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 10px; background: #f8fafc; }
@@ -104,7 +104,7 @@ input { width: 100%; padding: 14px; border: 2px solid #e5e7eb; border-radius: 12
 .gl-bird { width: min(36vw, 140px); animation: gshop .7s cubic-bezier(.3,0,.4,1) infinite; transform-origin: 50% 100%; }
 .gl-bird svg, .gl-bird img { display: block; width: 100%; height: auto; overflow: visible; }
 .gl-shadow { width: min(20vw, 80px); height: 10px; border-radius: 50%; background: rgba(0,0,0,.18); margin-top: 4px; animation: gshad .7s cubic-bezier(.3,0,.4,1) infinite; }
-.gs-name { margin-top: 26px; font-weight: 800; font-size: 22px; letter-spacing: .01em; color: #fff; text-align: center; padding: 0 16px; }
+.gs-name { margin-top: 26px; font: 400 30px/1 'Lilita One', 'Chalkboard SE', sans-serif; letter-spacing: .01em; color: #fff; text-align: center; padding: 0 16px; }
 .gs-bar { margin-top: 18px; width: 120px; height: 6px; border-radius: 3px; background: rgba(255,255,255,.3); overflow: hidden; }
 .gs-bar i { display: block; height: 100%; width: 0; background: #fff; border-radius: 3px; animation: gsfill .85s ease-out forwards; }
 @keyframes gshop { 0%,100% { transform: translateY(0) scale(1.08,.9); } 12% { transform: translateY(0) scale(.96,1.05); } 50% { transform: translateY(-30px) scale(.97,1.04); } 88% { transform: translateY(0) scale(1,1); } }

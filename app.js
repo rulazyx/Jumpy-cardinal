@@ -1,14 +1,13 @@
-// Jumpy Cardinal : menus, pièces, vies, boîte mystère, défis du jour, bonus de connexion et classement autour du jeu (games/flappy.js)
+// Jumpy Cardinal : menus, pièces, boîte mystère, défis du jour et classement autour du jeu (games/flappy.js)
 import { mount, birdPreview, STAGE_AT } from './games/flappy.js';
 import { logoArt, gIcon } from './gameart.js';
-import { SHOP, BIRD_CRATE, birdRarity, STAGE_NAMES, STAGE_COINS, LIVES, STREAK, AD_BOX_PER_DAY } from './config.js';
+import { SHOP, BIRD_CRATE, birdRarity, STAGE_NAMES, STAGE_COINS, MISSIONS_BONUS } from './config.js';
 import * as S from './store.js';
 import { showRewarded } from './ads.js';
 import * as LB from './leaderboard.js';
 
 const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const COIN = '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="#f6b91d" stroke="#9a6209" stroke-width="1.6"/><circle cx="10" cy="10" r="5.4" fill="none" stroke="#fde68a" stroke-width="1.5"/></svg>';
-const HEART = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.5-9.2C1 8.3 3.2 4.5 7 4.5c2.2 0 3.6 1.2 5 3 1.4-1.8 2.8-3 5-3 3.8 0 6 3.8 4.5 7.3C19.5 16.4 12 21 12 21z" fill="#ef4444" stroke="#991b1b" stroke-width="1.4"/></svg>';
 const CRATE = (size = 96) => `<svg viewBox="0 0 96 90" width="${size}" height="${Math.round(size * 0.94)}" aria-hidden="true">
   <ellipse cx="48" cy="84" rx="38" ry="5" fill="rgba(0,0,0,.18)"/>
   <rect x="10" y="26" width="76" height="56" rx="5" fill="#c98a4b" stroke="#4a2c12" stroke-width="3"/>
@@ -17,11 +16,14 @@ const CRATE = (size = 96) => `<svg viewBox="0 0 96 90" width="${size}" height="$
   <path d="M30 26v56M66 26v56" stroke="#4a2c12" stroke-width="2.5" opacity=".6"/>
   <circle cx="48" cy="56" r="15" fill="#ffd23f" stroke="#4a2c12" stroke-width="3"/>
   <path d="M43 51a5.5 5.5 0 1 1 8 5c-2 1.4-3 2.4-3 4.5M48 66.5v.5" fill="none" stroke="#4a2c12" stroke-width="3.4" stroke-linecap="round"/></svg>`;
+// Icônes des boutons ronds du menu (même trait que le trophée de La Kaz)
+const TROPHY = (size = 30) => `<svg viewBox="0 0 48 48" width="${size}" height="${size}" fill="none" stroke="#9a6a00" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 6h20v12a10 10 0 0 1-20 0z" fill="#facc15"/><path d="M14 10H7c0 7 3 10 8 10M34 10h7c0 7-3 10-8 10"/><path d="M24 28v8"/><path d="M16 42h16v-6H16z" fill="#facc15"/></svg>`;
+const DECOR = (size = 30) => `<svg viewBox="0 0 48 48" width="${size}" height="${size}" fill="none" stroke="#1f5d3a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="8" width="38" height="32" rx="6" fill="#7ec8e3" stroke="#2a6f8f"/><circle cx="33" cy="17" r="4" fill="#facc15" stroke="#b7791f"/><path d="M5 34l11-12 9 9 6-6 12 11v-2a6 6 0 0 1-6 6H11a6 6 0 0 1-6-6z" fill="#7bbf59"/></svg>`;
+const TARGET = (size = 30) => `<svg viewBox="0 0 48 48" width="${size}" height="${size}" fill="none" stroke="#991b1b" stroke-width="2.2" aria-hidden="true"><circle cx="24" cy="24" r="18" fill="#fff"/><circle cx="24" cy="24" r="12" fill="#ef4444"/><circle cx="24" cy="24" r="6" fill="#fff"/><circle cx="24" cy="24" r="2" fill="#991b1b"/></svg>`;
 const RAR_CLS = { 'Commun': 'rar-c', 'Rare': 'rar-r', 'Épique': 'rar-e', 'Légendaire': 'rar-l' };
-const birdName = (k) => SHOP.bird.find((b) => b.key === k)?.name ?? 'Cardinal';
 const imgCache = {};
 const birdImg = (k, size) => `<img class="bimg" src="${imgCache[k] ??= birdPreview(k, 160)}" width="${size}" height="${size}" alt="">`;
-const reward = (r) => [r.coins && `+${r.coins} ${COIN}`, r.lives && `+${r.lives} ${HEART}`, r.box && `+${r.box} boîte`].filter(Boolean).join(' ');
+const reward = (r) => (r.coins ? `+${r.coins} ${COIN}` : '');
 
 const s = S.load();
 const root = document.getElementById('game');
@@ -46,7 +48,7 @@ const game = mount(root, {
 });
 game.pause();
 
-function newRun() { run = { started: false, flaps: 0, coins: 0, counted: 0, lifeUsed: 0, adUsed: false, record: false }; }
+function newRun() { run = { started: false, flaps: 0, coins: 0, counted: 0, adUsed: false, record: false }; }
 
 function play() {
   sheet = null; mode = 'play'; newRun();
@@ -63,52 +65,43 @@ function gameOver(score) {
   render();
 }
 
-function revive(how) {
-  if (how === 'life') { if (s.lives < 1) return; s.lives--; run.lifeUsed++; }
-  else run.adUsed = true;
+function revive() {
+  run.adUsed = true;
   S.track(s, 'revives', 1); S.save(s);
   mode = 'play'; game.revive(); render();
 }
 
 // ---------- Affichage ----------
 function topbar() {
-  S.regen(s);
-  const t = S.nextLifeIn(s), mm = Math.ceil(t / 60000);
+  const ms = S.missionsToClaim(s);
   return `<div class="topbar">
-    <span class="pill">${COIN}<b>${s.coins}</b></span>
-    <span class="pill">${HEART}<b>${s.lives}</b>${t ? `<small>+1 dans ${mm >= 60 ? `${Math.floor(mm / 60)} h ${String(mm % 60).padStart(2, '0')}` : `${mm} min`}</small>` : ''}</span>
     <button class="pill name" data-a="pseudo">${esc(s.pseudo || 'Choisir un pseudo')}</button>
+    <span class="pill coins">${COIN}<b>${s.coins}</b></span>
+    <button class="round" data-a="birds" aria-label="Oiseaux">${birdImg(s.bird, 40)}</button>
+    <button class="round" data-a="board" aria-label="Classement">${TROPHY(30)}</button>
+    <button class="round" data-a="decors" aria-label="Décors">${DECOR(30)}</button>
+    <button class="round" data-a="missions" aria-label="Défis du jour">${TARGET(30)}${ms ? `<i class="dot">${ms}</i>` : ''}</button>
   </div>`;
 }
 
 function homeHTML() {
-  const ms = S.missionsToClaim(s), st = S.streakReady(s);
   return `${topbar()}
   <div class="home">
     <div class="logo"><div class="gl-bird">${birdImg(s.bird, 140)}</div><div class="gl-shadow"></div></div>
     <h1>Jumpy Cardinal</h1>
     <p class="best">Meilleur score : <b>${s.best}</b>${s.rank ? ` · ${s.rank}<sup>e</sup> mondial` : ''}</p>
     <button class="gh-btn go big" data-a="play">${gIcon('play')}Jouer</button>
-    <div class="grid">
-      <button class="tile" data-a="birds">${birdImg(s.bird, 44)}<span>Oiseaux</span></button>
-      <button class="tile" data-a="crate">${CRATE(44)}<span>Boîte mystère</span>${S.cratePool(s).length && s.adBoxDay !== S.dayOf() ? '<i class="dot">1</i>' : ''}</button>
-      <button class="tile" data-a="missions"><span class="ico">🎯</span><span>Défis du jour</span>${ms ? `<i class="dot">${ms}</i>` : ''}</button>
-      <button class="tile" data-a="streak"><span class="ico">🎁</span><span>Bonus du jour</span>${st ? '<i class="dot">!</i>' : ''}</button>
-      <button class="tile" data-a="board"><span class="ico">🏆</span><span>Classement</span></button>
-      <button class="tile" data-a="decors"><span class="ico">🗺️</span><span>Décors</span></button>
-    </div>
+    <button class="gh-btn go big crate" data-a="crate">${CRATE(30)}Boîte mystère${S.cratePool(s).length && s.adBoxDay !== S.dayOf() ? '<i class="dot">1</i>' : ''}</button>
   </div>`;
 }
 
 function overHTML() {
-  const sc = game.score, canLife = s.lives > 0 && run.lifeUsed < LIVES.perRun, canAd = !run.adUsed;
+  const sc = game.score, canAd = !run.adUsed;
   return `<div class="panel over">
     <h2>${run.record ? 'Nouveau record !' : 'Partie terminée'}</h2>
     <p class="big-score">${sc}</p>
     <p class="sub">Meilleur : ${s.best}${run.coins ? ` · +${run.coins} ${COIN}` : ''}</p>
-    ${canLife ? `<button class="gh-btn go" data-a="rev-life">${HEART} Repartir · 1 vie <small>(${s.lives})</small></button>` : ''}
     ${canAd ? `<button class="gh-btn ad" data-a="rev-ad">▶ Repartir avec une pub</button>` : ''}
-    ${!canLife && s.lives < 1 ? '<p class="hint">Plus de vies : fais les défis du jour, récupère ton bonus quotidien ou attends la recharge.</p>' : ''}
     <div class="two"><button class="gh-btn" data-a="play">${gIcon('replay')}Rejouer</button><button class="gh-btn" data-a="home">${gIcon('home')}Menu</button></div>
   </div>`;
 }
@@ -145,14 +138,7 @@ function sheetHTML() {
       }).join('');
       const allOk = s.missions.list.every((x) => x.claimed);
       return `<div class="panel">${close}<h2>Défis du jour</h2><p class="sub">Nouveaux défis chaque jour à minuit.</p>${list}
-        <div class="mission bonus"><div><b>Coffre des 3 défis</b><small>+1 ${HEART} +50 ${COIN}</small></div>${s.missions.bonus ? '<span class="check">✓</span>' : `<button class="gh-btn mini go" data-a="claim-bonus" ${allOk ? '' : 'disabled'}>Ouvrir</button>`}</div></div>`;
-    }
-    case 'streak': {
-      const next = S.streakNext(s), ready = S.streakReady(s);
-      return `<div class="panel center">${close}<h2>Bonus du jour</h2><p class="sub">Reviens chaque jour : la série monte jusqu'au 7<sup>e</sup> jour. Un jour sauté, elle repart à zéro.</p>
-        <div class="days">${STREAK.map((r, i) => `<div class="day ${i < next || (!ready && i === next - 1) ? 'got' : ''} ${ready && i === next ? 'now' : ''}"><small>Jour ${i + 1}</small><span>${reward(r)}</span></div>`).join('')}</div>
-        ${sheet.got ? `<p class="won">Jour ${sheet.got.day} : ${reward(sheet.got)}</p>` : ''}
-        <button class="gh-btn go" data-a="streak-claim" ${ready ? '' : 'disabled'}>${ready ? 'Récupérer' : 'Déjà récupéré, reviens demain'}</button></div>`;
+        <div class="mission bonus"><div><b>Coffre des 3 défis</b><small>${reward(MISSIONS_BONUS)}</small></div>${s.missions.bonus ? '<span class="check">✓</span>' : `<button class="gh-btn mini go" data-a="claim-bonus" ${allOk ? '' : 'disabled'}>Ouvrir</button>`}</div></div>`;
     }
     case 'board': {
       if (!LB.enabled()) return `<div class="panel center">${close}<h2>Classement</h2><p class="sub">Le classement en ligne n'est pas encore branché. Ton meilleur score (${s.best}) est gardé et sera envoyé dès qu'il le sera.</p></div>`;
@@ -195,11 +181,9 @@ async function act(a, el) {
     case 'play': play(); break;
     case 'home': mode = 'home'; sheet = null; game.restart(); render(); break;
     case 'close': sheet = null; render(); break;
-    case 'rev-life': revive('life'); break;
-    case 'rev-ad': if (await showRewarded('Regarde la pub pour repartir au même score.')) revive('ad'); break;
+    case 'rev-ad': if (await showRewarded('Regarde la pub pour repartir au même score.')) revive(); break;
     case 'birds': case 'missions': case 'decors': sheet = { type: a }; render(); break;
     case 'crate': sheet = { type: 'crate' }; render(); break;
-    case 'streak': sheet = { type: 'streak' }; render(); break;
     case 'pseudo': sheet = { type: 'pseudo' }; render(); ui.querySelector('input')?.focus(); break;
     case 'equip': s.bird = el.dataset.k; S.save(s); game.setBird(s.bird); sheet = { type: 'birds' }; render(); break;
     case 'crate-buy': case 'crate-ad': {
@@ -212,11 +196,6 @@ async function act(a, el) {
     }
     case 'claim': { const r = S.claimMission(s, el.dataset.k); if (r) toast(`<b>Défi réussi</b><span>${reward(r)}</span>`); render(); break; }
     case 'claim-bonus': { const r = S.claimMissionsBonus(s); if (r) toast(`<b>Coffre ouvert</b><span>${reward(r)}</span>`); render(); break; }
-    case 'streak-claim': {
-      const r = S.claimStreak(s); if (!r) return;
-      if (r.box) { const b = S.openCrate(s, { free: true }); if (b) toast(`<b>Boîte offerte</b><span>${esc(b.name)} débloqué !</span>`); }
-      sheet = { type: 'streak', got: r }; render(); break;
-    }
     case 'board': {
       sheet = { type: 'board' }; render();
       if (!LB.enabled()) return;
@@ -240,7 +219,6 @@ ui.addEventListener('submit', async (e) => {
   sheet = null; render();
 });
 window.addEventListener('online', () => LB.flush(s));
-setInterval(() => { if (mode === 'home' && !sheet) render(); }, 30000);   // minuterie des vies
 
 // ---------- Démarrage : écran de chargement, puis menu ----------
 const splash = document.createElement('div');
@@ -250,7 +228,6 @@ document.body.appendChild(splash);
 setTimeout(() => splash.remove(), 1150);
 newRun();
 if (!s.pseudo) sheet = { type: 'pseudo' };
-else if (S.streakReady(s)) sheet = { type: 'streak' };
 render();
 game.resume();   // l'oiseau flotte derrière le menu
 LB.flush(s);
