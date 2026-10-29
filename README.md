@@ -36,7 +36,7 @@ Tout est sauvegardé sur l'appareil (`localStorage`), sans compte.
 
 ## Classement en ligne
 
-1. Exécuter `supabase/schema.sql` dans un projet Supabase (aujourd’hui : le projet « Coloc », à côté de La Kaz).
+1. Exécuter `supabase/schema.sql` dans un projet Supabase (aujourd’hui : le projet dédié « jumpy-cardinal », région Irlande).
 2. Mettre l'URL du projet et la clé publique (anon / publishable) dans `www/online.js`.
 
 ## Préparation App Store
