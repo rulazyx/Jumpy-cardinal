@@ -3,7 +3,8 @@ import { mount, birdPreview, STAGE_AT } from './games/flappy.js';
 import { logoArt, gIcon } from './gameart.js';
 import { SHOP, BIRD_CRATE, birdRarity, STAGE_NAMES, STAGE_COINS, MISSIONS_BONUS } from './config.js';
 import * as S from './store.js';
-import { showRewarded } from './ads.js';
+import { showRewarded, privacyOptions } from './ads.js';
+import { badPseudo } from './moderation.js';
 import * as LB from './leaderboard.js';
 
 const esc = (t) => String(t ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -144,19 +145,39 @@ function sheetHTML() {
       const rows = sheet.rows;
       return `<div class="panel">${close}<h2>Classement mondial</h2>${!s.pseudo ? '<p class="hint">Choisis un pseudo pour apparaître dans le classement.</p>' : ''}
         ${rows === undefined ? '<p class="sub">Chargement…</p>' : rows === null ? '<p class="sub">Pas de connexion. Ton score sera envoyé plus tard.</p>'
-          : `<ol class="board">${rows.map((r, i) => `<li class="${r.pseudo === s.pseudo ? 'me' : ''}"><span>${i + 1}</span><b>${esc(r.pseudo)}</b><em>${r.best}</em></li>`).join('') || '<p class="sub">Personne encore : à toi !</p>'}</ol>`}
+          : `<ol class="board">${rows.filter((r) => !(s.blocked ?? []).includes(r.pseudo.toLowerCase())).map((r, i) => r.pseudo === s.pseudo
+            ? `<li class="me"><span>${i + 1}</span><b>${esc(r.pseudo)}</b><em>${r.best}</em></li>`
+            : `<li><button data-a="player" data-k="${esc(r.pseudo)}"><span>${i + 1}</span><b>${esc(r.pseudo)}</b><em>${r.best}</em></button></li>`).join('') || '<p class="sub">Personne encore : à toi !</p>'}</ol>
+            <p class="hint">Un pseudo choquant ? Touche-le pour le signaler ou le masquer.</p>`}
         ${s.rank ? `<p class="sub">Ta place : ${s.rank}<sup>e</sup> · meilleur score ${s.best}</p>` : ''}
-        <button class="link" data-a="pseudo">Pseudo : ${esc(s.pseudo || 'à choisir')} · changer</button></div>`;
+        <button class="link" data-a="pseudo">Pseudo : ${esc(s.pseudo || 'à choisir')} · changer</button>
+        ${privacyLinks()}</div>`;
     }
+    case 'player':
+      return `<div class="panel center">${close}<h2>${esc(sheet.pseudo)}</h2>
+        ${sheet.done ? `<p class="sub">${esc(sheet.done)}</p>` : `<p class="sub">Ce pseudo est insultant ou choquant ?</p>
+        <button class="gh-btn go" data-a="report">Signaler ce pseudo</button>
+        <button class="gh-btn" data-a="block">Masquer ce joueur</button>
+        <p class="hint">Un pseudo signalé par plusieurs joueurs disparaît du classement. Masquer le cache seulement chez toi.</p>`}</div>`;
+    case 'delete':
+      return `<div class="panel center">${close}<h2>Mes données</h2>
+        ${sheet.done ? `<p class="sub">${esc(sheet.done)}</p>` : `<p class="sub">Ton pseudo et ton score seront effacés du classement mondial. Tes pièces et tes oiseaux restent sur ton téléphone.</p>
+        ${sheet.err ? `<p class="err">${esc(sheet.err)}</p>` : ''}<button class="gh-btn go" data-a="delete-ok">Supprimer</button><button class="gh-btn" data-a="close">Annuler</button>`}</div>`;
     case 'decors':
       return `<div class="panel">${close}<h2>Décors</h2><p class="sub">Chaque nouveau décor atteint en partie rapporte des pièces.</p><ol class="decors">${STAGE_NAMES.map((n, i) => `<li class="${s.best >= STAGE_AT[i] ? 'seen' : ''}"><b>${s.best >= STAGE_AT[i] ? esc(n) : '???'}</b><span>${STAGE_AT[i] ? `${STAGE_AT[i]} colonnes · +${STAGE_COINS[i]} ${COIN}` : 'Départ'}</span></li>`).join('')}</ol></div>`;
     case 'pseudo':
       return `<div class="panel center">${s.pseudo ? close : ''}<h2>Ton pseudo</h2><p class="sub">Il s'affiche dans le classement mondial (3 à 16 caractères).</p>
         <form data-f="pseudo"><input name="p" maxlength="16" minlength="3" required pattern="[A-Za-z0-9À-ÿ_ .\\-]{3,16}" value="${esc(s.pseudo)}" placeholder="Pseudo" autocomplete="off">
         ${sheet.err ? `<p class="err">${esc(sheet.err)}</p>` : ''}<button class="gh-btn go">Valider</button></form>
-        ${s.pseudo ? '' : '<button class="link" data-a="close">Plus tard</button>'}</div>`;
+        ${s.pseudo ? '' : '<button class="link" data-a="close">Plus tard</button>'}
+        ${privacyLinks()}</div>`;
   }
   return '';
+}
+
+// Liens de confidentialité (classement et pseudo) : politique, choix pour les pubs, suppression des données
+function privacyLinks() {
+  return `<p class="legal"><a href="confidentialite.html" target="_blank" rel="noopener">Confidentialité</a> · <button class="link" data-a="ads-privacy">Choix pour les pubs</button>${LB.enabled() && s.pseudo ? ' · <button class="link" data-a="delete">Supprimer mes données</button>' : ''}</p>`;
 }
 
 function render() {
@@ -196,6 +217,23 @@ async function act(a, el) {
     }
     case 'claim': { const r = S.claimMission(s, el.dataset.k); if (r) toast(`<b>Défi réussi</b><span>${reward(r)}</span>`); render(); break; }
     case 'claim-bonus': { const r = S.claimMissionsBonus(s); if (r) toast(`<b>Coffre ouvert</b><span>${reward(r)}</span>`); render(); break; }
+    case 'player': sheet = { type: 'player', pseudo: el.dataset.k, back: sheet?.rows }; render(); break;
+    case 'report': {
+      try { await LB.report(s, sheet.pseudo); sheet.done = 'Merci, le pseudo a été signalé.'; }
+      catch { sheet.done = 'Signalement impossible pour le moment (pas de connexion ?). Tu peux masquer ce joueur.'; }
+      render(); break;
+    }
+    case 'block': {
+      s.blocked = [...new Set([...(s.blocked ?? []), sheet.pseudo.toLowerCase()])]; S.save(s);
+      sheet = { type: 'board', rows: sheet.back }; render(); break;
+    }
+    case 'ads-privacy': if (!await privacyOptions()) toast('<b>Pubs</b><span>Les choix s\'affichent dans l\'appli installée.</span>'); break;
+    case 'delete': sheet = { type: 'delete' }; render(); break;
+    case 'delete-ok': {
+      try { await LB.remove(s); Object.assign(s, { pseudo: '', rank: null, unsent: null }); S.save(s); sheet.done = 'C\'est fait : tes données ont été effacées du classement.'; }
+      catch { sheet.err = 'Impossible pour le moment. Vérifie ta connexion et réessaie.'; }
+      render(); break;
+    }
     case 'board': {
       sheet = { type: 'board' }; render();
       if (!LB.enabled()) return;
@@ -209,10 +247,12 @@ ui.addEventListener('click', (e) => { const b = e.target.closest('[data-a]'); if
 ui.addEventListener('submit', async (e) => {
   e.preventDefault();
   const p = new FormData(e.target).get('p').toString().trim();
+  if (badPseudo(p)) { sheet.err = 'Ce pseudo n\'est pas autorisé. Choisis-en un autre.'; render(); return; }
   const old = s.pseudo; s.pseudo = p; S.save(s);
   if (LB.enabled()) {
     try { await LB.sync(s); } catch (err) {
       if (/pseudo_pris/.test(err.message)) { s.pseudo = old; S.save(s); sheet.err = 'Ce pseudo est déjà pris.'; render(); return; }
+      if (/pseudo_interdit|pseudo_invalide/.test(err.message)) { s.pseudo = old; S.save(s); sheet.err = 'Ce pseudo n\'est pas autorisé. Choisis-en un autre.'; render(); return; }
       s.unsent = s.best;   // hors ligne : on enverra plus tard
     }
   }

@@ -8,11 +8,34 @@ const AD_IDS = {   // identifiants de TEST fournis par Google : à remplacer par
 const admob = () => window.Capacitor?.isNativePlatform?.() ? window.Capacitor.Plugins?.AdMob : null;
 let ready = null;
 
+// Avant la première pub : consentement RGPD (formulaire Google « UMP », seulement là où la loi l'exige, ex. Europe),
+// puis sur iPhone la fenêtre Apple « Autoriser le suivi » (App Tracking Transparency). Sans accord, AdMob montre des pubs non personnalisées.
+async function consent(A) {
+  try {
+    const info = await A.requestConsentInfo();
+    if (info?.isConsentFormAvailable && info.status === 'REQUIRED') await A.showConsentForm();
+  } catch { /* formulaire indisponible : AdMob reste en pubs non personnalisées */ }
+  try {
+    if (window.Capacitor.getPlatform() === 'ios') {
+      const { status } = await A.trackingAuthorizationStatus();
+      if (status === 'notDetermined') await A.requestTrackingAuthorization();
+    }
+  } catch { /* iOS ancien ou refus : rien à faire */ }
+  await A.initialize({ initializeForTesting: true });
+}
+
+// Bouton « Choix pour les pubs » : rouvre le formulaire de consentement. Renvoie false hors de l'appli installée.
+export async function privacyOptions() {
+  const A = admob();
+  if (!A) return false;
+  try { await (A.showPrivacyOptionsForm ?? A.showConsentForm).call(A); return true; } catch { return false; }
+}
+
 export async function showRewarded(reason = '') {
   const A = admob();
   if (A) {
     try {
-      ready ??= A.initialize({ initializeForTesting: true });
+      ready ??= consent(A);
       await ready;
       await A.prepareRewardVideoAd({ adId: AD_IDS[window.Capacitor.getPlatform()] ?? AD_IDS.android, isTesting: true });
       const r = await A.showRewardVideoAd();
