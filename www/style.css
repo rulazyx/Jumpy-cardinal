@@ -232,3 +232,4 @@ textarea { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius:
   html, body { height: 100vh; }
   .g-flappy, .ui, .gsplash { bottom: auto; height: 100vh; }
 }
+.sheet { z-index: 30; }   /* les fenêtres passent au-dessus de la barre d'EXP et de la bulle */
