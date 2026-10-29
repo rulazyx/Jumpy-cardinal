@@ -2,7 +2,9 @@
 // Le score = nombre de colonnes passées. Toucher l'écran / espace / ↑ = battre des ailes.
 import { SHOP } from '../config.js';
 import { gIcon } from '../gameart.js';
-export const W = 288, H = 480, GROUND = 64;
+export const W = 288, GROUND = 64;
+// Hauteur du terrain : 480 sur tablette, plus haute sur les téléphones allongés pour voir toute la largeur sans rogner les côtés
+export let H = 480;
 const GRAVITY = 0.42, FLAP = -6.9, MAX_FALL = 9;
 const PIPE_W = 54, GAP = 128, SPEED = 2.3, SPACING = 176, BIRD_X = 78, BIRD_R = 12;
 
@@ -93,7 +95,7 @@ let skyMemo = { k: '', cv: null };
 let RES = 1;
 export const FONT = "'Lilita One', 'Chalkboard SE', 'Arial Rounded MT Bold', system-ui, sans-serif";
 function skyFor(th, score) {
-  const key = `${score}@${RES}`;
+  const key = `${score}@${RES}@${H}`;
   if (skyMemo.k === key) return skyMemo.cv;
   const cv = skyMemo.cv ?? document.createElement('canvas'); cv.width = Math.round(W * RES); cv.height = Math.round(H * RES);
   const c = cv.getContext('2d'), hg = H - GROUND; c.setTransform(RES, 0, 0, RES, 0, 0);
@@ -303,7 +305,7 @@ function scoreText(ctx, score) {
   const now = performance.now();
   if (score !== popScore) { if (score > popScore) popAt = now; popScore = score; }
   const k = Math.max(0, 1 - (now - popAt) / 220), sc = 1 + 0.28 * k * k;
-  ctx.save(); ctx.translate(W / 2, 62); ctx.scale(sc, sc);
+  ctx.save(); ctx.translate(W / 2, 62 + (H - 480) * 0.3); ctx.scale(sc, sc);   // plus bas sur les téléphones allongés, sous l'encoche
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = `60px ${FONT}`;
   ctx.fillStyle = 'rgba(0,30,60,.28)'; ctx.fillText(score, 0, 4);
   ctx.fillStyle = '#fff'; ctx.fillText(score, 0, 0);
@@ -359,6 +361,9 @@ export function mount(root, { bird, onStage, onOver, onFlap }) {
     <button class="gmute" data-act="mute" aria-label="Son">${snd.muted ? SPK_OFF : SPK_ON}</button>`;
   const cv = root.querySelector('canvas'), ctx = cv.getContext('2d', { alpha: false }), muteBtn = root.querySelector('.gmute');
   function fit() {   // nombre de pixels réels par unité de jeu (plafonné à ~4 millions de pixels pour garder 60 images/s)
+    const v = root.getBoundingClientRect(), ar = v.width / v.height;
+    H = ar > 0 && ar < 2 / 3 ? Math.round(Math.min(660, Math.max(480, W / ar))) : 480;
+    cv.style.aspectRatio = `${W} / ${H}`;
     const r = cv.getBoundingClientRect(), cover = getComputedStyle(cv).objectFit === 'cover';
     const k = (cover ? Math.max : Math.min)(r.width / W, r.height / H) * (window.devicePixelRatio || 1);
     RES = Math.min(Math.sqrt(4e6 / (W * H)), Math.max(1, Math.round(k * 4) / 4)) || 1;

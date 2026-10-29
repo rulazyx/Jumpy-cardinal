@@ -11,6 +11,8 @@ Le jeu vient de l'appli de coloc « La Kaz » (dépôt [rulazyx/COLOCATION](http
 - **Oiseaux** : les 14 de La Kaz plus 8 nouveaux (Pirate, Père Noël, Zombie, Robot, Astronaute, Fantôme, Licorne, Phénix).
 - **Repartir** : une pub permet de repartir au même score, une fois par partie.
 - **Défis du jour** : 3 défis tirés chaque jour qui rapportent des pièces, plus un coffre quand les 3 sont réussis.
+- **Profil et niveaux** : chaque partie rapporte de l'XP (1 par colonne + 3). Les niveaux donnent des pièces, des grades (Oisillon, Moineau… Légende) et des cadres autour de l'oiseau. Le profil regroupe pseudo, oiseau, cadre, grade, record, support et signalement de bugs (table `jc_feedback`).
+- **Amis** : on ajoute un ami par son pseudo et on compare les records.
 - **Pseudo et classement mondial** : le meilleur score part en ligne dès qu'il y a du réseau (Supabase, voir plus bas).
 
 Tout est sauvegardé sur l'appareil (`localStorage`), sans compte.
@@ -36,7 +38,7 @@ Tout est sauvegardé sur l'appareil (`localStorage`), sans compte.
 
 ## Classement en ligne
 
-1. Exécuter `supabase/schema.sql` dans un projet Supabase (aujourd’hui : le projet dédié « jumpy-cardinal », région Irlande).
+1. Exécuter `supabase/schema.sql` (il peut être relancé sans perdre de données après chaque mise à jour) dans un projet Supabase (aujourd’hui : le projet dédié « jumpy-cardinal », région Irlande).
 2. Mettre l'URL du projet et la clé publique (anon / publishable) dans `www/online.js`.
 
 ## Préparation App Store
