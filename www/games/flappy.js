@@ -88,11 +88,15 @@ export function themeAt(score) {   // transition douce pendant les 10 colonnes q
 const rgbaToHex = (c) => { if (c[0] === '#') return c; const m = c.match(/[\d.]+/g).map(Number); return '#' + [m[0], m[1], m[2]].map((v) => Math.round(v).toString(16).padStart(2, '0')).join('') + Math.round((m[3] ?? 1) * 255).toString(16).padStart(2, '0'); };
 
 // Ciel (dégradé, étoiles, lune, lueur de lave) : dessiné une seule fois par colonne dans un calque, puis recopié à chaque image
-let skyMemo = { k: -1, cv: null };
+let skyMemo = { k: '', cv: null };
+// Résolution : le jeu est pensé en 288×480, mais tout est dessiné à la taille réelle de l'écran (pixels du téléphone) pour rester net
+let RES = 1;
+export const FONT = "'Lilita One', 'Chalkboard SE', 'Arial Rounded MT Bold', system-ui, sans-serif";
 function skyFor(th, score) {
-  if (skyMemo.k === score) return skyMemo.cv;
-  const cv = skyMemo.cv ?? document.createElement('canvas'); cv.width = W; cv.height = H;
-  const c = cv.getContext('2d'), hg = H - GROUND;
+  const key = `${score}@${RES}`;
+  if (skyMemo.k === key) return skyMemo.cv;
+  const cv = skyMemo.cv ?? document.createElement('canvas'); cv.width = Math.round(W * RES); cv.height = Math.round(H * RES);
+  const c = cv.getContext('2d'), hg = H - GROUND; c.setTransform(RES, 0, 0, RES, 0, 0);
   const gr = c.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, th.sT); gr.addColorStop(1, th.sB); c.fillStyle = gr; c.fillRect(0, 0, W, H);
   if (th.star > 0.01) {
     c.fillStyle = '#fff'; for (let k = 0; k < 40; k++) { c.globalAlpha = th.star * (0.5 + 0.5 * ((k * 7) % 5) / 4); c.fillRect((k * 83) % W, (k * 47) % 330, k % 3 ? 1.6 : 2.6, k % 3 ? 1.6 : 2.6); } c.globalAlpha = 1;
@@ -105,16 +109,17 @@ function skyFor(th, score) {
     }
   }
   if (th.hell > 0.01) { const lg = c.createLinearGradient(0, hg - 160, 0, hg); lg.addColorStop(0, 'rgba(255,90,20,0)'); lg.addColorStop(1, `rgba(255,110,30,${0.55 * th.hell})`); c.fillStyle = lg; c.fillRect(0, hg - 160, W, 160); }
-  skyMemo = { k: score, cv };
+  skyMemo = { k: key, cv };
   return cv;
 }
 
 const BASE = { body: '#ef4444', belly: '#fecaca', wing: '#b91c1c' };
 // L'oiseau est dessiné une seule fois (16 images : aile haut/bas × 8 phases d'accessoire) puis recopié : plus de dégradés ni d'ombres à chaque image
-const BS = 60, SS = 3;
+const BS = 60;
 function birdSprite(skin, frame) {
   const wf = Math.floor(frame / 5) % 2, ph = Math.floor(frame / 6) % 8, key = wf * 8 + ph;
-  skin._spr ??= {};
+  const SS = Math.max(2, Math.ceil(RES));
+  if (skin._ss !== SS) { skin._spr = {}; skin._ss = SS; }
   if (!skin._spr[key]) {
     const cv = document.createElement('canvas'); cv.width = cv.height = BS * SS;
     const c = cv.getContext('2d'); c.scale(SS, SS); c.translate(BS / 2, BS / 2);
@@ -127,12 +132,16 @@ function paintBird(ctx, frame, skin) {
   let body = skin.body;
   if (skin.rainbow) { const gr = ctx.createLinearGradient(-14, -14, 14, 14); ['#ef4444', '#facc15', '#22c55e', '#3b82f6'].forEach((c, i) => gr.addColorStop(i / 3, c)); body = gr; }
   ctx.fillStyle = body; ctx.beginPath(); ctx.arc(0, 0, BIRD_R + 2, 0, 7); ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,.22)'; ctx.lineWidth = 1.2; ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,.22)'; ctx.beginPath(); ctx.ellipse(-3, -8, 6, 3, -0.4, 0, 7); ctx.fill();
   ctx.fillStyle = skin.belly; ctx.beginPath(); ctx.ellipse(2, 5, 9, 6, 0, 0, 7); ctx.fill();
   ctx.fillStyle = skin.wing; ctx.beginPath(); ctx.ellipse(-5, 2 + (Math.floor(frame / 5) % 2 ? -3 : 3), 7, 4.5, -0.3, 0, 7); ctx.fill();
   ctx.fillStyle = skin.eyeBg ?? '#fff'; ctx.beginPath(); ctx.arc(6, -4, 4.4, 0, 7); ctx.fill();
   if (skin.eye) { ctx.shadowColor = skin.eye; ctx.shadowBlur = 8; }
   ctx.fillStyle = skin.eye ?? '#111'; ctx.beginPath(); ctx.arc(7.4, -4, skin.eye ? 3 : 2, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
-  ctx.fillStyle = '#f59e0b'; ctx.beginPath(); ctx.moveTo(11, -1); ctx.lineTo(21, 2); ctx.lineTo(11, 6); ctx.fill();
+  if (!skin.eye) { ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(8.2, -4.9, 0.8, 0, 7); ctx.fill(); }
+  ctx.fillStyle = '#f59e0b'; ctx.beginPath(); ctx.moveTo(11, -1); ctx.lineTo(21, 2); ctx.lineTo(11, 6); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = 'rgba(120,60,0,.35)'; ctx.lineWidth = 0.8; ctx.stroke();
   PAINT_ACC[skin.acc]?.(ctx, skin, frame);
   if (skin.acc === 'shades') { ctx.fillStyle = '#111'; ctx.fillRect(2, -8, 12, 6); ctx.fillRect(-2, -6, 5, 2); }
   if (skin.acc === 'band') { ctx.fillStyle = '#dc2626'; ctx.fillRect(-12, -10, 24, 4); ctx.beginPath(); ctx.moveTo(-12, -9); ctx.lineTo(-22, -4 + Math.sin(frame / 4) * 3); ctx.lineTo(-12, -6); ctx.fill(); }
@@ -206,13 +215,17 @@ const PAINT_ACC = {
 const CLOUDS = [[50, 90, 18], [190, 140, 14], [120, 60, 12]];
 export function draw(ctx, g, frame, skin = BASE) {
   const th = themeAt(g.score), hg = H - GROUND;
-  ctx.drawImage(skyFor(th, g.score), 0, 0);
+  ctx.drawImage(skyFor(th, g.score), 0, 0, W, H);
   // nuages
   ctx.fillStyle = th.cloud;
   for (let ci = 0; ci < 3; ci++) {
     const cx = CLOUDS[ci][0] - (frame * 0.2) % 340 + 340, cy = CLOUDS[ci][1], r = CLOUDS[ci][2], x = cx % 340 - 20; ctx.beginPath(); ctx.arc(x, cy, r, 0, 7); ctx.arc(x + r, cy + 4, r * 0.8, 0, 7); ctx.arc(x - r, cy + 4, r * 0.7, 0, 7); ctx.fill();
   }
-  // collines
+  // collines : un plan lointain plus clair, puis le plan proche
+  ctx.globalAlpha = 0.45; ctx.fillStyle = th.hill;
+  ctx.beginPath(); ctx.moveTo(0, hg);
+  for (let x = 0; x <= W; x += 8) ctx.lineTo(x, hg - 72 - Math.sin((x + frame * 0.12) / 55) * 18 - Math.sin((x + frame * 0.12) / 23) * 5);
+  ctx.lineTo(W, hg); ctx.fill(); ctx.globalAlpha = 1;
   ctx.fillStyle = th.hill;
   ctx.beginPath(); ctx.moveTo(0, hg);
   for (let x = 0; x <= W; x += 8) ctx.lineTo(x, hg - 40 - Math.sin((x + frame * 0.3) / 38) * 14);
@@ -234,6 +247,8 @@ export function draw(ctx, g, frame, skin = BASE) {
       ctx.fillStyle = th.p3; ctx.fillRect(p.x + PIPE_W - 10, y0, 10, y1 - y0);
       ctx.fillStyle = th.p4; ctx.fillRect(p.x - 4, cap, PIPE_W + 8, 16);
       ctx.fillStyle = th.p5; ctx.fillRect(p.x - 4, cap + (cap === p.top - 16 ? 10 : 0), PIPE_W + 8, 6);
+      ctx.strokeStyle = 'rgba(0,0,0,.28)'; ctx.lineWidth = 1.6; ctx.strokeRect(p.x, y0, PIPE_W, y1 - y0); ctx.strokeRect(p.x - 4, cap, PIPE_W + 8, 16);   // contour façon dessin animé
+      ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.fillRect(p.x - 2, cap + 2, PIPE_W + 4, 2);
       if (th.ruin > 0.5 && th.hell < 0.5) {   // pierre fissurée
         ctx.strokeStyle = 'rgba(0,0,0,.45)'; ctx.lineWidth = 1.5; ctx.beginPath(); const cy0 = y0 + ((p.x * 7) % 40) + 20; ctx.moveTo(p.x + 8, cy0); ctx.lineTo(p.x + 20, cy0 + 12); ctx.lineTo(p.x + 14, cy0 + 24); ctx.lineTo(p.x + 30, cy0 + 40); ctx.stroke();
       }
@@ -245,6 +260,8 @@ export function draw(ctx, g, frame, skin = BASE) {
   // sol
   ctx.fillStyle = th.gnd; ctx.fillRect(0, H - GROUND, W, GROUND);
   ctx.fillStyle = th.grass; ctx.fillRect(0, H - GROUND, W, 10);
+  ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.fillRect(0, H - GROUND + 10, W, 2.5);
+  ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.fillRect(0, H - GROUND, W, 2);
   ctx.fillStyle = th.dash;
   for (let x = -((frame * SPEED) % 24); x < W; x += 24) ctx.fillRect(x, H - GROUND + 22, 12, 5);
   if (th.hell > 0.01) {   // braises qui montent
@@ -267,7 +284,7 @@ export function draw(ctx, g, frame, skin = BASE) {
       ctx.strokeStyle = skin.wing; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(-q.sz, 0); ctx.lineTo(q.sz, 0); ctx.stroke();
       ctx.restore();
     }
-    ctx.textAlign = 'center'; ctx.font = '800 44px system-ui, sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText(g.score, W / 2, 70);
+    scoreText(ctx, g.score);
     return;
   }
   if (g.menu) return;
@@ -278,11 +295,25 @@ export function draw(ctx, g, frame, skin = BASE) {
   ctx.drawImage(spr, -BS / 2, -BS / 2, BS, BS);
   ctx.restore();
   // score
-  ctx.textAlign = 'center'; ctx.font = '800 44px system-ui, sans-serif';
-  ctx.fillStyle = '#fff'; ctx.fillText(g.score, W / 2, 70);
+  scoreText(ctx, g.score);
   if (!g.started) {
-    ctx.font = '700 18px system-ui, sans-serif'; ctx.fillStyle = '#fff'; ctx.fillText('Touche pour voler', W / 2, 250);
+    ctx.save(); ctx.textAlign = 'center'; ctx.font = `24px ${FONT}`; ctx.fillStyle = '#fff';
+    ctx.shadowColor = 'rgba(0,40,80,.3)'; ctx.shadowOffsetY = 2; ctx.globalAlpha = 0.75 + Math.sin(frame / 12) * 0.25;
+    ctx.fillText(g.revived && g.score ? 'Touche pour repartir' : 'Touche pour voler', W / 2, 262); ctx.restore();
   }
+}
+
+// Score : grande police cartoon, petite ombre portée pour rester lisible sur tous les décors, et un rebond à chaque point
+let popAt = -1, popScore = 0;
+function scoreText(ctx, score) {
+  const now = performance.now();
+  if (score !== popScore) { if (score > popScore) popAt = now; popScore = score; }
+  const k = Math.max(0, 1 - (now - popAt) / 220), sc = 1 + 0.28 * k * k;
+  ctx.save(); ctx.translate(W / 2, 62); ctx.scale(sc, sc);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = `60px ${FONT}`;
+  ctx.fillStyle = 'rgba(0,30,60,.28)'; ctx.fillText(score, 0, 4);
+  ctx.fillStyle = '#fff'; ctx.fillText(score, 0, 0);
+  ctx.restore();
 }
 
 
@@ -333,6 +364,16 @@ export function mount(root, { bird, onStage, onOver, onFlap }) {
   root.innerHTML = `<canvas class="gcanvas" width="${W}" height="${H}" aria-label="Jumpy Cardinal"></canvas>
     <button class="gmute" data-act="mute" aria-label="Son">${snd.muted ? SPK_OFF : SPK_ON}</button>`;
   const cv = root.querySelector('canvas'), ctx = cv.getContext('2d', { alpha: false }), muteBtn = root.querySelector('.gmute');
+  function fit() {   // nombre de pixels réels par unité de jeu (plafonné à ~4 millions de pixels pour garder 60 images/s)
+    const r = cv.getBoundingClientRect(), cover = getComputedStyle(cv).objectFit === 'cover';
+    const k = (cover ? Math.max : Math.min)(r.width / W, r.height / H) * (window.devicePixelRatio || 1);
+    RES = Math.min(Math.sqrt(4e6 / (W * H)), Math.max(1, Math.round(k * 4) / 4)) || 1;
+    cv.width = Math.round(W * RES); cv.height = Math.round(H * RES);
+    ctx.setTransform(RES, 0, 0, RES, 0, 0); ctx.imageSmoothingQuality = 'high';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+  document.fonts?.load(`60px ${FONT}`);
   let menu = false, paused = false, g = createGame(), raf = 0, last = 0, frame = 0, reported = false, destroyed = false;
   const flap = () => { if (paused || g.dead || onFlap?.() === false) return; g.flap(); };
   const onKey = (e) => { if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); flap(); } };
@@ -361,7 +402,7 @@ export function mount(root, { bird, onStage, onOver, onFlap }) {
     restart() { g = createGame(); reported = false; },
     menu(on) { menu = on; },   // derrière le menu : décor seul, sans oiseau ni score
     setBird(key) { skin = { ...BASE, ...(SHOP.bird.find((b) => b.key === key) ?? {}) }; },
-    destroy() { destroyed = true; cancelAnimationFrame(raf); window.removeEventListener('keydown', onKey); },
+    destroy() { destroyed = true; cancelAnimationFrame(raf); window.removeEventListener('keydown', onKey); window.removeEventListener('resize', fit); },
   };
 }
 
