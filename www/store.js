@@ -44,31 +44,49 @@ export function openCrate(s, { free = false } = {}) {
   return b;
 }
 
-// Défis du jour : 3 défis tirés chaque jour, compteurs remis à zéro
+// Défis du jour : 3 défis tirés chaque jour. Chaque défi compte sa propre progression depuis qu'il est apparu,
+// et un défi récupéré peut être remplacé par un nouveau contre une pub. Le coffre s'ouvre après 3 défis récupérés.
 export function rollMissions(s) {
-  if (s.missions.day === dayOf()) return;
+  if (s.missions.day === dayOf()) {
+    for (const x of s.missions.list) if (x.p === undefined) { const m = missionOf(x.key); x.p = Math.min(m.goal, s.missions.stats?.[m.stat] ?? 0); }   // ancienne sauvegarde
+    s.missions.claims ??= s.missions.list.filter((x) => x.claimed).length;
+    return;
+  }
   const keys = [...MISSIONS].sort(() => Math.random() - 0.5).slice(0, 3).map((m) => m.key);
-  s.missions = { day: dayOf(), list: keys.map((key) => ({ key, claimed: false })), bonus: false, stats: {} };
+  s.missions = { day: dayOf(), list: keys.map((key) => ({ key, claimed: false, p: 0 })), bonus: false, claims: 0, stats: {} };
 }
 export function track(s, stat, v) {
   rollMissions(s);
   const st = s.missions.stats;
   st[stat] = stat === 'best' ? Math.max(st[stat] ?? 0, v) : (st[stat] ?? 0) + v;
+  for (const x of s.missions.list) {
+    const m = missionOf(x.key);
+    if (m.stat === stat && !x.claimed) x.p = stat === 'best' ? Math.max(x.p, v) : x.p + v;
+  }
 }
 export const missionOf = (key) => MISSIONS.find((m) => m.key === key);
-export const missionProg = (s, key) => { const m = missionOf(key); return Math.min(m.goal, s.missions.stats[m.stat] ?? 0); };
+export const missionProg = (s, key) => { const x = s.missions.list.find((y) => y.key === key); return Math.min(missionOf(key).goal, x?.p ?? 0); };
 export function claimMission(s, key) {
   const it = s.missions.list.find((x) => x.key === key), m = missionOf(key);
   if (!it || it.claimed || missionProg(s, key) < m.goal) return null;
-  it.claimed = true; give(s, m.reward); save(s);
+  it.claimed = true; s.missions.claims++; give(s, m.reward); save(s);
   return m.reward;
 }
+// Après une pub : le défi récupéré laisse la place à un nouveau défi (différent de ceux affichés)
+export function rerollMission(s, key) {
+  const i = s.missions.list.findIndex((x) => x.key === key && x.claimed);
+  if (i < 0) return null;
+  const shown = s.missions.list.map((x) => x.key), pool = MISSIONS.filter((m) => !shown.includes(m.key));
+  const m = (pool.length ? pool : MISSIONS)[Math.floor(Math.random() * (pool.length || MISSIONS.length))];
+  s.missions.list[i] = { key: m.key, claimed: false, p: 0 }; save(s);
+  return m;
+}
 export function claimMissionsBonus(s) {
-  if (s.missions.bonus || !s.missions.list.every((x) => x.claimed)) return null;
+  if (s.missions.bonus || s.missions.claims < 3) return null;
   s.missions.bonus = true; give(s, MISSIONS_BONUS); save(s);
   return MISSIONS_BONUS;
 }
-export const missionsToClaim = (s) => s.missions.list.filter((x) => !x.claimed && missionProg(s, x.key) >= missionOf(x.key).goal).length + (!s.missions.bonus && s.missions.list.every((x) => x.claimed) ? 1 : 0);
+export const missionsToClaim = (s) => s.missions.list.filter((x) => !x.claimed && missionProg(s, x.key) >= missionOf(x.key).goal).length + (!s.missions.bonus && s.missions.claims >= 3 ? 1 : 0);
 
 // Niveaux : ajoute de l'XP (défi réussi, palier atteint) et renvoie les niveaux gagnés (avec leurs pièces)
 export function addXp(s, xp = 0) {

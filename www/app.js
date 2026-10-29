@@ -22,6 +22,7 @@ const TROPHY = (size = 30) => `<svg viewBox="0 0 48 48" width="${size}" height="
 const HANGER = (size = 30) => `<svg viewBox="0 0 48 48" width="${size}" height="${size}" fill="none" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M24 17v-3a4.5 4.5 0 1 0-4.5-4.5" stroke="#6b4a2b" stroke-width="2.6"/><path d="M24 17 5 33a3 3 0 0 0 2 5.3h34A3 3 0 0 0 43 33z" fill="#e2a35c" stroke="#6b4a2b" stroke-width="2.4"/><path d="M10 34h28" stroke="#fde7c3" stroke-width="2.2"/></svg>`;
 const FRIENDS = (size = 30) => `<svg viewBox="0 0 48 48" width="${size}" height="${size}" stroke-width="2.2" stroke-linejoin="round" aria-hidden="true"><circle cx="32" cy="16" r="6.5" fill="#93c5fd" stroke="#1e40af"/><path d="M21 39c0-7 5-12 11-12s11 5 11 12z" fill="#93c5fd" stroke="#1e40af"/><circle cx="17" cy="18" r="7" fill="#fca5a5" stroke="#991b1b"/><path d="M4 41c0-8 6-13 13-13s13 5 13 13z" fill="#fca5a5" stroke="#991b1b"/></svg>`;
 const SCROLL = (size = 30) => `<svg viewBox="0 0 48 48" width="${size}" height="${size}" fill="none" stroke="#7c4a12" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8h26a4 4 0 0 1 0 8h-4v22a4 4 0 0 1-4 4H10a4 4 0 0 1 0-8h4V12a4 4 0 0 1 4-4" fill="#fde7b0"/><path d="M14 34h12a4 4 0 0 1-4 8M20 18h8M20 25h8"/><path d="M38 8a4 4 0 0 0-4 4v4" /></svg>`;
+const TV = (size = 22) => `<svg viewBox="0 0 48 48" width="${size}" height="${size}" aria-hidden="true"><path d="M17 6l7 7 7-7" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/><rect x="4" y="13" width="40" height="29" rx="6" fill="currentColor"/><path d="M20 21.5v12l10-6z" fill="#fff"/></svg>`;
 const GEAR = (size = 30) => `<svg viewBox="0 0 48 48" width="${size}" height="${size}" aria-hidden="true"><path d="M20.5 4h7l1.2 5.3 3.6 1.5 4.6-2.9 5 5-2.9 4.6 1.5 3.6 5.3 1.2v7l-5.3 1.2-1.5 3.6 2.9 4.6-5 5-4.6-2.9-3.6 1.5-1.2 5.3h-7l-1.2-5.3-3.6-1.5-4.6 2.9-5-5 2.9-4.6-1.5-3.6L4 27.5v-7l5.3-1.2 1.5-3.6-2.9-4.6 5-5 4.6 2.9 3.6-1.5z" fill="#cbd5e1" stroke="#475569" stroke-width="2.2" stroke-linejoin="round"/><circle cx="24" cy="24" r="6.5" fill="#fff" stroke="#475569" stroke-width="2.2"/></svg>`;
 const DECOR = (size = 30) => `<svg viewBox="0 0 48 48" width="${size}" height="${size}" fill="none" stroke="#1f5d3a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="8" width="38" height="32" rx="6" fill="#7ec8e3" stroke="#2a6f8f"/><circle cx="33" cy="17" r="4" fill="#facc15" stroke="#b7791f"/><path d="M5 34l11-12 9 9 6-6 12 11v-2a6 6 0 0 1-6 6H11a6 6 0 0 1-6-6z" fill="#7bbf59"/></svg>`;
 const TARGET = (size = 30) => `<svg viewBox="0 0 48 48" width="${size}" height="${size}" fill="none" stroke="#991b1b" stroke-width="2.2" aria-hidden="true"><circle cx="24" cy="24" r="18" fill="#fff"/><circle cx="24" cy="24" r="12" fill="#ef4444"/><circle cx="24" cy="24" r="6" fill="#fff"/><circle cx="24" cy="24" r="2" fill="#991b1b"/></svg>`;
@@ -110,7 +111,7 @@ function topbar() {
 
 function homeHTML() {
   const ms = S.missionsToClaim(s), pool = S.cratePool(s);
-  const crateReady = pool.length && (s.adBoxDay !== S.dayOf() || s.coins >= BIRD_CRATE.price);   // une boîte peut être ouverte maintenant
+  const adBox = pool.length && s.adBoxDay !== S.dayOf();   // la boîte gratuite du jour (contre une vidéo) est disponible
   return `${topbar()}
   <div class="home">
     <div class="logo"><div class="gl-bird">${birdImg(s.bird, 140)}</div><div class="gl-shadow"></div></div>
@@ -119,7 +120,7 @@ function homeHTML() {
     <div class="row23"><button class="gh-btn go big" data-a="play">${gIcon('play')}Jouer</button>
       <button class="gh-btn big crate side" data-a="wardrobe" aria-label="Oiseaux et cadres">${HANGER(34)}</button></div>
     <button class="gh-btn big crate wide ${ms ? 'ready' : ''}" data-a="quests">${SCROLL(30)}Quêtes${ms ? `<i class="dot">${ms}</i>` : ''}</button>
-    <button class="gh-btn big crate wide ${crateReady ? 'ready' : ''}" data-a="crate">${CRATE(30)}Boîte mystère</button>
+    <button class="gh-btn big crate wide ${adBox ? 'tvready' : ''}" data-a="crate">${CRATE(30)}Boîte mystère${adBox ? `<i class="tvdot" aria-label="Boîte vidéo disponible">${TV(20)}</i>` : ''}</button>
   </div>`;
 }
 
@@ -173,12 +174,14 @@ function sheetHTML() {
       }
       const list = s.missions.list.map((x) => {
         const m = S.missionOf(x.key), p = S.missionProg(s, x.key), done = p >= m.goal;
-        return `<div class="mission ${x.claimed ? 'ok' : ''}"><div><b>${esc(m.text)}</b><div class="bar"><i style="width:${(p / m.goal) * 100}%"></i></div><small>${p} / ${m.goal} · ${reward(m.reward)}</small></div>
-          ${x.claimed ? '<span class="check">✓</span>' : `<button class="gh-btn mini go" data-a="claim" data-k="${x.key}" ${done ? '' : 'disabled'}>Récupérer</button>`}</div>`;
+        if (x.claimed) return `<div class="mission over"><div><b>Quête terminée</b><small>Regarde une vidéo pour recharger une nouvelle quête</small></div>
+          <button class="gh-btn mini ad" data-a="reroll" data-k="${x.key}" aria-label="Regarder une vidéo pour une nouvelle quête">${TV(18)}Recharger</button></div>`;
+        return `<div class="mission"><div><b>${esc(m.text)}</b><div class="bar"><i style="width:${(p / m.goal) * 100}%"></i></div><small>${p} / ${m.goal} · ${reward(m.reward)}</small></div>
+          <button class="gh-btn mini go" data-a="claim" data-k="${x.key}" ${done ? '' : 'disabled'}>Récupérer</button></div>`;
       }).join('');
-      const allOk = s.missions.list.every((x) => x.claimed);
+      const allOk = s.missions.claims >= 3;
       return `<div class="panel">${close}<h2>Quêtes</h2>${tabs(tab, [['defis', 'Défis du jour'], ['decors', 'Décors']])}<p class="sub">Nouveaux défis chaque jour à minuit.</p>${list}
-        <div class="mission bonus"><div><b>Coffre des 3 défis</b><small>${reward(MISSIONS_BONUS)}</small></div>${s.missions.bonus ? '<span class="check">✓</span>' : `<button class="gh-btn mini go" data-a="claim-bonus" ${allOk ? '' : 'disabled'}>Ouvrir</button>`}</div></div>`;
+        <div class="mission bonus"><div><b>Coffre des 3 défis</b><small>${Math.min(3, s.missions.claims)} / 3 · ${reward(MISSIONS_BONUS)}</small></div>${s.missions.bonus ? '<span class="check">✓</span>' : `<button class="gh-btn mini go" data-a="claim-bonus" ${allOk ? '' : 'disabled'}>Ouvrir</button>`}</div></div>`;
     }
     case 'profile': {
       const g = gradeOf(s.level), next = GRADES.find((x) => x.lvl > s.level), need = xpToNext(s.level);
@@ -355,6 +358,12 @@ async function act(a, el) {
       break;
     }
     case 'claim': { const r = S.claimMission(s, el.dataset.k); if (r) { toast(`<b>Défi réussi</b><span>${reward(r)}</span>`); levelToasts(S.addXp(s, r.xp), 2600); } render(); break; }
+    case 'reroll': {
+      if (!await showRewarded('Regarde la vidéo pour recharger une nouvelle quête.')) return;
+      const m = S.rerollMission(s, el.dataset.k);
+      if (m) toast(`<b>Nouvelle quête</b><span>${esc(m.text)}</span>`);
+      render(); break;
+    }
     case 'claim-bonus': { const r = S.claimMissionsBonus(s); if (r) { toast(`<b>Coffre ouvert</b><span>${reward(r)}</span>`); levelToasts(S.addXp(s, r.xp), 2600); } render(); break; }
     case 'player': {
       const from = el.dataset.from, rows = sheet?.rows ?? (from === 'friends' ? s.friends : null);

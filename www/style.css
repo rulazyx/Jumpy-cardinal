@@ -217,3 +217,12 @@ textarea { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius:
 .setlist > .snd.on .sw i { left: 21px; }
 .setlist > .snd:active { transform: translateY(2px); box-shadow: 0 1px 0 #d5dde7; }
 .setlist > .snd.on:active { box-shadow: 0 1px 0 #15803d; }
+/* Boîte mystère : pastille TV qui clignote quand la boîte vidéo du jour est disponible */
+.gh-btn.big.crate.tvready { animation: breathe 1.6s ease-in-out infinite; }
+.tvdot { position: absolute; top: -9px; right: -9px; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: #ef4444; color: #fff; border: 3px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.25); animation: tvblink 1.2s ease-in-out infinite; }
+@keyframes tvblink { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.15); opacity: .75; } }
+@media (prefers-reduced-motion: reduce) { .gh-btn.big.crate.tvready, .tvdot { animation: none; } }
+/* Quête terminée : place libre, rechargeable avec une vidéo */
+.mission.over { background: #f0fdf4; border: 2px dashed #86efac; }
+.mission.over b { color: #15803d; }
+.gh-btn.mini.ad { gap: 6px; color: #fff; }
