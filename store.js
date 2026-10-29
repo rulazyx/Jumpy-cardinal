@@ -1,5 +1,5 @@
 // Sauvegarde sur l'appareil (localStorage) : tout le jeu marche hors ligne
-import { SHOP, BIRD_CRATE, MISSIONS, MISSIONS_BONUS } from './config.js';
+import { SHOP, BIRD_CRATE, MISSIONS, MISSIONS_BONUS, XP_PER_GAME, xpToNext, levelReward } from './config.js';
 
 const KEY = 'jc-save-v1';
 const pad = (n) => String(n).padStart(2, '0');
@@ -9,7 +9,9 @@ const rid = () => (crypto.randomUUID?.() ?? 'xxxxxxxx-xxxx-4xxx-8xxx-xxxxxxxxxxx
 function fresh() {
   return {
     pseudo: '', playerId: rid(), secret: rid() + rid(),
-    coins: 0, best: 0, bird: 'cardinal', owned: [],
+    coins: 0, best: 0, bird: 'cardinal', owned: [], frame: 'simple',
+    xp: 0, level: 1,   // niveau du joueur (voir config.js)
+    friends: [],       // derniers scores des amis connus, pour l'affichage hors ligne
     adBoxDay: '',
     missions: { day: '', list: [], bonus: false, stats: {} },
     unsent: null,   // meilleur score pas encore envoyé au classement (hors ligne)
@@ -19,7 +21,11 @@ function fresh() {
 export const save = (s) => { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch { /* stockage plein ou bloqué */ } };
 export function load() {
   let s = fresh();
-  try { s = { ...s, ...JSON.parse(localStorage.getItem(KEY) || '{}') }; } catch { /* sauvegarde illisible : on repart de zéro */ }
+  let old = {};
+  try { old = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { /* sauvegarde illisible : on repart de zéro */ }
+  if (old.best && old.xp === undefined) { old.xp = old.best * 3; old.level = 1; old.dirty = true; }   // sauvegarde d'avant les niveaux : un peu d'XP selon le record
+  s = { ...s, ...old };
+  while (s.xp >= xpToNext(s.level)) { s.xp -= xpToNext(s.level); s.level++; }
   rollMissions(s); save(s);
   return s;
 }
@@ -63,3 +69,16 @@ export function claimMissionsBonus(s) {
   return MISSIONS_BONUS;
 }
 export const missionsToClaim = (s) => s.missions.list.filter((x) => !x.claimed && missionProg(s, x.key) >= missionOf(x.key).goal).length + (!s.missions.bonus && s.missions.list.every((x) => x.claimed) ? 1 : 0);
+
+// Niveaux : ajoute l'XP d'une partie et renvoie les niveaux gagnés (avec leurs pièces)
+export function addXp(s, cols, game = true) {
+  s.xp += cols + (game ? XP_PER_GAME : 0);
+  const ups = [];
+  while (s.xp >= xpToNext(s.level)) {
+    s.xp -= xpToNext(s.level); s.level++;
+    const r = levelReward(s.level); give(s, r); ups.push({ level: s.level, ...r });
+  }
+  if (ups.length) s.dirty = true;
+  save(s);
+  return ups;
+}

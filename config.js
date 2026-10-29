@@ -47,3 +47,36 @@ export const MISSIONS = [
   { key: 'revive1',  text: 'Repartir une fois',            goal: 1,   stat: 'revives', reward: { coins: 30 } },
 ];
 export const MISSIONS_BONUS = { coins: 100 };
+
+// Niveaux : chaque partie rapporte de l'XP (1 par colonne passée + 3 pour avoir joué). Passer du niveau n au n+1 demande 30 + 15 × n XP.
+export const XP_PER_GAME = 3;
+export const xpToNext = (lvl) => 30 + 15 * lvl;
+export const levelReward = (lvl) => ({ coins: 20 + 5 * lvl });   // pièces gagnées en atteignant le niveau lvl
+
+// Grades : un nouveau titre à certains niveaux (couleur du badge de niveau)
+export const GRADES = [
+  { lvl: 1,  name: 'Oisillon',    color: '#94a3b8' },
+  { lvl: 5,  name: 'Moineau',     color: '#a16207' },
+  { lvl: 10, name: 'Pinson',      color: '#16a34a' },
+  { lvl: 15, name: 'Merle',       color: '#334155' },
+  { lvl: 20, name: 'Rouge-gorge', color: '#ea580c' },
+  { lvl: 25, name: 'Geai',        color: '#2563eb' },
+  { lvl: 30, name: 'Faucon',      color: '#7c3aed' },
+  { lvl: 40, name: 'Aigle',       color: '#b45309' },
+  { lvl: 50, name: 'Légende',     color: '#db2777' },
+];
+export const gradeOf = (lvl) => [...GRADES].reverse().find((g) => lvl >= g.lvl);
+
+// Cadres autour de l'oiseau du profil : débloqués en montant de niveau
+export const FRAMES = [
+  { key: 'simple',   name: 'Simple',      lvl: 1 },
+  { key: 'bois',     name: 'Bois',        lvl: 3 },
+  { key: 'argent',   name: 'Argent',      lvl: 5 },
+  { key: 'or',       name: 'Or',          lvl: 10 },
+  { key: 'feuilles', name: 'Feuillage',   lvl: 15 },
+  { key: 'glace',    name: 'Glace',       lvl: 20 },
+  { key: 'flammes',  name: 'Flammes',     lvl: 25 },
+  { key: 'neon',     name: 'Néon',        lvl: 30 },
+  { key: 'arc',      name: 'Arc-en-ciel', lvl: 40 },
+  { key: 'cosmos',   name: 'Cosmos',      lvl: 50 },
+];
