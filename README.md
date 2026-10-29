@@ -1,20 +1,65 @@
 # Jumpy Cardinal
 
-Un oiseau rouge qui bat des ailes entre des colonnes : touche l'écran (ou Espace / ↑) pour voler. Le score est le nombre de colonnes passées, et le décor change par paliers (soir à 50, crépuscule à 100, nuit à 150, monde délabré à 200, enfers à 250).
+Un oiseau qui bat des ailes entre des colonnes : touche l'écran (ou Espace / ↑) pour voler. Le score est le nombre de colonnes passées.
 
-Le jeu vient de l'appli de coloc « La Kaz » (dépôt [rulazyx/COLOCATION](https://github.com/rulazyx/COLOCATION), commit `c134f9a`). Ce dépôt en est la version autonome, base de la future appli pour téléphones et tablettes.
+Le jeu vient de l'appli de coloc « La Kaz » (dépôt [rulazyx/COLOCATION](https://github.com/rulazyx/COLOCATION), commit `c134f9a`). Ce dépôt en fait une appli pour téléphones et tablettes, qui marche hors ligne.
+
+## Ce que contient l'appli
+
+- **Décors** : 16 décors qui changent à 15, 30, 50, 75, 100, 150, 200, 300, 400, 500, 600, 700, 800, 900 et 1000 colonnes (aube, désert, automne, banquise, aurore boréale, abysses, bonbons, néon, espace, paradis doré…). Chaque nouveau décor atteint rapporte des pièces.
+- **Boîte mystère** : même système que La Kaz (150 pièces, un oiseau au hasard parmi ceux qu'on n'a pas, tirage pondéré par rareté). Une boîte gratuite par jour contre une pub.
+- **Oiseaux** : les 14 de La Kaz plus 8 nouveaux (Pirate, Père Noël, Zombie, Robot, Astronaute, Fantôme, Licorne, Phénix).
+- **Repartir** : une pub permet de repartir au même score, une fois par partie.
+- **Défis du jour** : 3 défis tirés chaque jour qui rapportent des pièces, plus un coffre quand les 3 sont réussis.
+- **Profil et niveaux** : l'XP vient des défis du jour et des paliers de décor atteints (barre d'XP à côté des pièces). Les niveaux donnent des pièces, des grades (Oisillon, Moineau… Légende) et des cadres autour de l'oiseau. Le profil regroupe pseudo, oiseau, cadre, grade, record, support et signalement de bugs (table `jc_feedback`).
+- **Amis** : on ajoute un ami par son pseudo et on compare les records.
+- **Pseudo et classement mondial** : le meilleur score part en ligne dès qu'il y a du réseau (Supabase, voir plus bas).
+
+Tout est sauvegardé sur l'appareil (`localStorage`), sans compte.
 
 ## Fichiers
 
-- `games/flappy.js` : le jeu (logique, dessin, sons synthétisés), copié tel quel.
-- `gameart.js` : icônes des menus et logo animé, copié tel quel.
-- `config.js` : les 14 oiseaux (couleurs, accessoires, rareté) et la caisse mystère, extraits de `config.js` de COLOCATION.
-- Écran de chargement animé (oiseau qui sautille, nom du jeu, barre de progression), repris de `openGame` dans `app.js` et des styles `.gsplash` / `.gl-bird`.
-- `index.html`, `style.css`, `manifest.webmanifest` : page autonome plein écran, sans compte ni serveur (meilleur score gardé sur l'appareil).
-- `icons/` : icônes du cardinal.
-
-Ce qui reste dans COLOCATION car lié aux comptes Supabase : XP, colocoins, défis, classements, boutique et choix de l'oiseau.
+- `www/` : l'appli web, qui sera embarquée telle quelle dans l'appli Android / iOS.
+  - `games/flappy.js` : le jeu (logique, dessin, décors, sons, skins), repris de COLOCATION.
+  - `app.js` : menus, pièces, boîte mystère, défis du jour, classement.
+  - `store.js` : sauvegarde et règles (défis, boîte).
+  - `config.js` : oiseaux, pièces par décor, défis du jour.
+  - `fonts/LilitaOne.woff2` : police cartoon des scores et fenêtres ; `fonts/GlacialIndifference-Bold.woff2` : nom du jeu en capitales (licences SIL OFL), embarquées pour marcher hors ligne.
+  - `img/rzx.png` : logo RZX Studio de l'intro (il apparaît, se resserre et éclate), tiré de `design/rzx-studio.png`.
+  - `icons/` : icône de l'appli (l'oiseau de La Kaz sur fond bleu), regénérée par `node tools/icons.cjs`.
+  - `ads.js` : pubs récompensées (AdMob dans l'appli, pub simulée de 5 s dans le navigateur).
+  - `leaderboard.js` + `online.js` : classement en ligne (désactivé tant que `online.js` est vide).
+  - `moderation.js` : filtre anti-insultes des pseudos (même liste que `jc_bad_pseudo` côté serveur).
+  - `confidentialite.html` : politique de confidentialité (à héberger publiquement pour l'App Store).
+- `supabase/schema.sql` : base du classement (table `jc_players`, fonctions `jc_sync_player` et `jc_top_scores`, préfixées pour pouvoir partager une base existante).
 
 ## Lancer
 
-Les fichiers sont des modules ES : il faut un petit serveur, par exemple `npx serve .` puis ouvrir l'adresse affichée.
+`npx serve www` puis ouvrir l'adresse affichée (les fichiers sont des modules ES, il faut un petit serveur).
+
+## Classement en ligne
+
+1. Exécuter `supabase/schema.sql` (il peut être relancé sans perdre de données après chaque mise à jour) dans un projet Supabase (aujourd’hui : le projet dédié « jumpy-cardinal », région Irlande).
+2. Mettre l'URL du projet et la clé publique (anon / publishable) dans `www/online.js`.
+
+## Préparation App Store
+
+- **Pseudos (règle 1.2)** : pseudos insultants refusés dans l'appli et par le serveur (`jc_bad_pseudo`). Toucher un joueur du classement permet de le signaler ou de le masquer pour soi. Après 3 signalements de joueurs différents, il disparaît du classement (il réapparaît s'il change de pseudo).
+- **Suppression des données (règle 5.1.1)** : « Supprimer mes données » en bas du menu appelle `jc_delete_player`.
+- **Pubs** : au premier lancement natif, `ads.js` affiche le choix RGPD de Google (UMP) puis, sur iOS, la demande de suivi Apple (ATT), avant d'initialiser AdMob. « Choix pour les pubs » rouvre le choix RGPD.
+- **Confidentialité** : `www/confidentialite.html`. App Store Connect demande une URL publique (par exemple GitHub Pages sur ce dépôt). Remplacer l'adresse de contact à compléter.
+- **Nom** : ne jamais écrire « Flappy » dans le nom, la description ou les mots-clés de la fiche (risque de rejet pour copie, règles 4.1 / 4.3).
+
+## Appli iOS / Android (Capacitor 8)
+
+- `capacitor.config.json` : identifiant `fr.jumpycardinal.app`, le web vient de `www/`. Dossiers natifs `ios/` (Swift Package Manager, pas de CocoaPods) et `android/` (cible API 36).
+- Pubs : `@capacitor-community/admob` 8. `Info.plist` contient déjà `GADApplicationIdentifier`, `NSUserTrackingUsageDescription`, la liste `SKAdNetworkItems` de Google et `ITSAppUsesNonExemptEncryption = false`. Les identifiants sont ceux de test de Google : `node tools/admob-ids.cjs <appli Android> <bloc Android> <appli iOS> <bloc iOS>` met les vrais partout et coupe le mode test.
+- Icônes et écrans de lancement : `npm run assets` (sources dans `assets/`, générées par `tools/native-assets.cjs`).
+- Fiches des stores : `store/` (icônes 512 et 1024, bannière Google, captures). Captures regénérées par `node tools/store-shots.cjs`.
+- Signature Android : `android/keystore.properties` (jamais commité), puis `cd android && ./gradlew bundleRelease`.
+
+```bash
+npm install
+npx cap sync        # après chaque changement dans www/
+npx cap open ios    # ou: npx cap open android
+```
