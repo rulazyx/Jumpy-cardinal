@@ -1,11 +1,18 @@
 // Pubs récompensées. Dans l'appli (Capacitor + AdMob) on montre une vraie pub ; dans le navigateur, une pub simulée de 5 s.
 // showRewarded() renvoie true si la pub a été regardée jusqu'au bout.
-const AD_IDS = {   // identifiants de TEST fournis par Google : à remplacer par ceux du compte AdMob avant la publication
+// Identifiants de TEST fournis par Google. Pour la publication : node tools/admob-ids.cjs (voir store/CHECKLIST.md),
+// qui met les vrais blocs d'annonces ici et passe TESTING à false.
+const AD_IDS = {
   android: 'ca-app-pub-3940256099942544/5224354917',
   ios: 'ca-app-pub-3940256099942544/1712485313',
 };
+const TESTING = true;
 
-const admob = () => window.Capacitor?.isNativePlatform?.() ? window.Capacitor.Plugins?.AdMob : null;
+const admob = () => {
+  const C = window.Capacitor;
+  if (!C?.isNativePlatform?.()) return null;
+  return C.Plugins?.AdMob ?? C.registerPlugin?.('AdMob') ?? null;
+};
 let ready = null;
 
 // Avant la première pub : consentement RGPD (formulaire Google « UMP », seulement là où la loi l'exige, ex. Europe),
@@ -21,7 +28,7 @@ async function consent(A) {
       if (status === 'notDetermined') await A.requestTrackingAuthorization();
     }
   } catch { /* iOS ancien ou refus : rien à faire */ }
-  await A.initialize({ initializeForTesting: true });
+  await A.initialize({ initializeForTesting: TESTING });
 }
 
 // Bouton « Choix pour les pubs » : rouvre le formulaire de consentement. Renvoie false hors de l'appli installée.
@@ -37,7 +44,7 @@ export async function showRewarded(reason = '') {
     try {
       ready ??= consent(A);
       await ready;
-      await A.prepareRewardVideoAd({ adId: AD_IDS[window.Capacitor.getPlatform()] ?? AD_IDS.android, isTesting: true });
+      await A.prepareRewardVideoAd({ adId: AD_IDS[window.Capacitor.getPlatform()] ?? AD_IDS.android, isTesting: TESTING });
       const r = await A.showRewardVideoAd();
       return !!r;
     } catch { return false; }

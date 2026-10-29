@@ -211,7 +211,7 @@ function sheetHTML() {
           <button data-a="ads-privacy"><span>Choix pour les pubs</span><em>›</em></button>
           <button data-a="support"><span>Support</span><em>›</em></button>
           <button data-a="feedback" data-k="bug"><span>Signaler un bug</span><em>›</em></button>
-          <a href="confidentialite.html" target="_blank" rel="noopener"><span>Confidentialité</span><em>›</em></a>
+          <a href="https://rulazyx.github.io/Jumpy-cardinal/confidentialite.html" target="_blank" rel="noopener"><span>Confidentialité</span><em>›</em></a>
           ${LB.enabled() && s.pseudo ? '<button data-a="delete"><span>Supprimer mes données</span><em>›</em></button>' : ''}
         </div><p class="hint">Jumpy Cardinal ${APP_VERSION} · RZX Studio</p></div>`;
     case 'support':
@@ -278,7 +278,7 @@ function boardRow(r, i, from) {
 
 // Liens de confidentialité (classement et pseudo) : politique, choix pour les pubs, suppression des données
 function privacyLinks() {
-  return `<p class="legal"><a href="confidentialite.html" target="_blank" rel="noopener">Confidentialité</a> · <button class="link" data-a="ads-privacy">Choix pour les pubs</button>${LB.enabled() && s.pseudo ? ' · <button class="link" data-a="delete">Supprimer mes données</button>' : ''}</p>`;
+  return `<p class="legal"><a href="https://rulazyx.github.io/Jumpy-cardinal/confidentialite.html" target="_blank" rel="noopener">Confidentialité</a> · <button class="link" data-a="ads-privacy">Choix pour les pubs</button>${LB.enabled() && s.pseudo ? ' · <button class="link" data-a="delete">Supprimer mes données</button>' : ''}</p>`;
 }
 
 // Barre d'état du téléphone (heure, batterie) : même couleur que le haut du ciel, assombrie ou éclaircie comme le menu affiché
