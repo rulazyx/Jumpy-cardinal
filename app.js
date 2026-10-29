@@ -198,12 +198,12 @@ function sheetHTML() {
     case 'pause':
       return `<div class="panel center"><h2>Pause</h2><p class="sub">Score : ${game.score}</p>
         <button class="gh-btn go" data-a="resume">${gIcon('play')}Reprendre</button>
-        <div class="setlist wide"><button data-a="mute"><span>Son</span><b class="sw ${game.muted ? '' : 'on'}"><i></i></b></button></div>
+        <div class="setlist wide"><button class="snd ${game.muted ? '' : 'on'}" data-a="mute" role="switch" aria-checked="${!game.muted}"><span>Son ${game.muted ? 'désactivé' : 'activé'}</span><b class="sw"><i></i></b></button></div>
         <button class="gh-btn" data-a="quit">${gIcon('home')}Quitter la partie</button></div>`;
     case 'settings':
       return `<div class="panel">${close}<h2>Paramètres</h2>
         <div class="setlist">
-          <button data-a="mute"><span>Son</span><b class="sw ${game.muted ? '' : 'on'}"><i></i></b></button>
+          <button class="snd ${game.muted ? '' : 'on'}" data-a="mute" role="switch" aria-checked="${!game.muted}"><span>Son ${game.muted ? 'désactivé' : 'activé'}</span><b class="sw"><i></i></b></button>
           <button data-a="ads-privacy"><span>Choix pour les pubs</span><em>›</em></button>
           <button data-a="support"><span>Support</span><em>›</em></button>
           <button data-a="feedback" data-k="bug"><span>Signaler un bug</span><em>›</em></button>
@@ -318,7 +318,11 @@ async function act(a, el) {
     case 'quit': sheet = null; game.resume(); gameOver(game.score); act('home'); break;
     case 'bubble': bubble = !bubble; render(); return;
     case 'settings': sheet = { type: 'settings' }; render(); break;
-    case 'mute': game.toggleMute(); render(); break;
+    case 'mute': {   // pas de nouveau rendu : le bouton change de couleur et la pastille glisse
+      const on = !game.toggleMute();
+      el.classList.toggle('on', on); el.setAttribute('aria-checked', on); el.querySelector('span').textContent = `Son ${on ? 'activé' : 'désactivé'}`;
+      break;
+    }
     case 'rev-ad': if (await showRewarded('Regarde la pub pour repartir au même score.')) revive(); break;
     case 'wardrobe': case 'quests': case 'profile': case 'support': sheet = { type: a, tab: el.dataset.k }; render(); break;
     case 'tab': sheet.tab = el.dataset.k; render(); break;
