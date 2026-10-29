@@ -75,7 +75,6 @@ function revive() {
 function topbar() {
   const ms = S.missionsToClaim(s);
   return `<div class="topbar">
-    <button class="pill name" data-a="pseudo">${esc(s.pseudo || 'Choisir un pseudo')}</button>
     <span class="pill coins">${COIN}<b>${s.coins}</b></span>
     <button class="round" data-a="birds" aria-label="Oiseaux">${birdImg(s.bird, 40)}</button>
     <button class="round" data-a="board" aria-label="Classement">${TROPHY(30)}</button>
@@ -91,7 +90,7 @@ function homeHTML() {
     <h1>Jumpy Cardinal</h1>
     <p class="best">Meilleur score : <b>${s.best}</b>${s.rank ? ` · ${s.rank}<sup>e</sup> mondial` : ''}</p>
     <button class="gh-btn go big" data-a="play">${gIcon('play')}Jouer</button>
-    <button class="gh-btn go big crate" data-a="crate">${CRATE(30)}Boîte mystère${S.cratePool(s).length && s.adBoxDay !== S.dayOf() ? '<i class="dot">1</i>' : ''}</button>
+    <button class="gh-btn big crate" data-a="crate">${CRATE(30)}Boîte mystère${S.cratePool(s).length && s.adBoxDay !== S.dayOf() ? '<i class="dot">1</i>' : ''}</button>
   </div>`;
 }
 
@@ -146,7 +145,8 @@ function sheetHTML() {
       return `<div class="panel">${close}<h2>Classement mondial</h2>${!s.pseudo ? '<p class="hint">Choisis un pseudo pour apparaître dans le classement.</p>' : ''}
         ${rows === undefined ? '<p class="sub">Chargement…</p>' : rows === null ? '<p class="sub">Pas de connexion. Ton score sera envoyé plus tard.</p>'
           : `<ol class="board">${rows.map((r, i) => `<li class="${r.pseudo === s.pseudo ? 'me' : ''}"><span>${i + 1}</span><b>${esc(r.pseudo)}</b><em>${r.best}</em></li>`).join('') || '<p class="sub">Personne encore : à toi !</p>'}</ol>`}
-        ${s.rank ? `<p class="sub">Ta place : ${s.rank}<sup>e</sup> · meilleur score ${s.best}</p>` : ''}</div>`;
+        ${s.rank ? `<p class="sub">Ta place : ${s.rank}<sup>e</sup> · meilleur score ${s.best}</p>` : ''}
+        <button class="link" data-a="pseudo">Pseudo : ${esc(s.pseudo || 'à choisir')} · changer</button></div>`;
     }
     case 'decors':
       return `<div class="panel">${close}<h2>Décors</h2><p class="sub">Chaque nouveau décor atteint en partie rapporte des pièces.</p><ol class="decors">${STAGE_NAMES.map((n, i) => `<li class="${s.best >= STAGE_AT[i] ? 'seen' : ''}"><b>${s.best >= STAGE_AT[i] ? esc(n) : '???'}</b><span>${STAGE_AT[i] ? `${STAGE_AT[i]} colonnes · +${STAGE_COINS[i]} ${COIN}` : 'Départ'}</span></li>`).join('')}</ol></div>`;
