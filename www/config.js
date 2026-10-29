@@ -33,26 +33,17 @@ export const birdRarity = (w) => (w >= 12 ? 'Commun' : w >= 5 ? 'Rare' : w >= 2 
 export const STAGE_NAMES = ['Prairie', 'Aube rose', 'Désert', 'Soir', 'Automne', 'Crépuscule', 'Nuit', 'Banquise', 'Aurore boréale', 'Monde délabré', 'Enfers', 'Abysses', 'Pays des bonbons', 'Néon', 'Espace', 'Paradis doré'];
 export const STAGE_COINS = [0, 10, 15, 20, 25, 30, 40, 50, 60, 70, 80, 90, 100, 120, 150, 250];
 
-// Vies : une vie permet de repartir au même score. Une pub aussi (une seule fois par partie).
-export const LIVES = { start: 3, max: 9, regenMax: 3, regenH: 3, perRun: 2 };   // regenMax : la recharge gratuite s'arrête à 3 vies, une vie toutes les 3 h
-export const AD_BOX_PER_DAY = 1;
-
-// Bonus de connexion : une série de 7 jours, qui repart à zéro si on saute un jour
-export const STREAK = [
-  { coins: 20 }, { coins: 30 }, { lives: 1 }, { coins: 50 }, { coins: 60 }, { lives: 2 }, { coins: 100, box: 1 },
-];
-
-// Défis du jour : 3 tirés au hasard chaque jour ; les 3 réussis = coffre bonus (1 vie)
+// Défis du jour : 3 tirés au hasard chaque jour ; les 3 réussis = coffre bonus
 export const MISSIONS = [
   { key: 'games3',   text: 'Jouer 3 parties',              goal: 3,   stat: 'games',   reward: { coins: 20 } },
-  { key: 'games8',   text: 'Jouer 8 parties',              goal: 8,   stat: 'games',   reward: { lives: 1 } },
+  { key: 'games8',   text: 'Jouer 8 parties',              goal: 8,   stat: 'games',   reward: { coins: 50 } },
   { key: 'cols30',   text: 'Passer 30 colonnes au total',  goal: 30,  stat: 'cols',    reward: { coins: 25 } },
-  { key: 'cols100',  text: 'Passer 100 colonnes au total', goal: 100, stat: 'cols',    reward: { lives: 1 } },
+  { key: 'cols100',  text: 'Passer 100 colonnes au total', goal: 100, stat: 'cols',    reward: { coins: 50 } },
   { key: 'run15',    text: 'Atteindre 15 en une partie',   goal: 15,  stat: 'best',    reward: { coins: 30 } },
-  { key: 'run30',    text: 'Atteindre 30 en une partie',   goal: 30,  stat: 'best',    reward: { lives: 1 } },
-  { key: 'run50',    text: 'Atteindre 50 en une partie',   goal: 50,  stat: 'best',    reward: { lives: 2 } },
+  { key: 'run30',    text: 'Atteindre 30 en une partie',   goal: 30,  stat: 'best',    reward: { coins: 50 } },
+  { key: 'run50',    text: 'Atteindre 50 en une partie',   goal: 50,  stat: 'best',    reward: { coins: 80 } },
   { key: 'flaps200', text: 'Battre des ailes 200 fois',    goal: 200, stat: 'flaps',   reward: { coins: 20 } },
   { key: 'box1',     text: 'Ouvrir une boîte mystère',     goal: 1,   stat: 'boxes',   reward: { coins: 40 } },
   { key: 'revive1',  text: 'Repartir une fois',            goal: 1,   stat: 'revives', reward: { coins: 30 } },
 ];
-export const MISSIONS_BONUS = { lives: 1, coins: 50 };
+export const MISSIONS_BONUS = { coins: 100 };
