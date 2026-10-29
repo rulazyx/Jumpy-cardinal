@@ -132,16 +132,12 @@ function paintBird(ctx, frame, skin) {
   let body = skin.body;
   if (skin.rainbow) { const gr = ctx.createLinearGradient(-14, -14, 14, 14); ['#ef4444', '#facc15', '#22c55e', '#3b82f6'].forEach((c, i) => gr.addColorStop(i / 3, c)); body = gr; }
   ctx.fillStyle = body; ctx.beginPath(); ctx.arc(0, 0, BIRD_R + 2, 0, 7); ctx.fill();
-  ctx.strokeStyle = 'rgba(0,0,0,.22)'; ctx.lineWidth = 1.2; ctx.stroke();
-  ctx.fillStyle = 'rgba(255,255,255,.22)'; ctx.beginPath(); ctx.ellipse(-3, -8, 6, 3, -0.4, 0, 7); ctx.fill();
   ctx.fillStyle = skin.belly; ctx.beginPath(); ctx.ellipse(2, 5, 9, 6, 0, 0, 7); ctx.fill();
   ctx.fillStyle = skin.wing; ctx.beginPath(); ctx.ellipse(-5, 2 + (Math.floor(frame / 5) % 2 ? -3 : 3), 7, 4.5, -0.3, 0, 7); ctx.fill();
   ctx.fillStyle = skin.eyeBg ?? '#fff'; ctx.beginPath(); ctx.arc(6, -4, 4.4, 0, 7); ctx.fill();
   if (skin.eye) { ctx.shadowColor = skin.eye; ctx.shadowBlur = 8; }
   ctx.fillStyle = skin.eye ?? '#111'; ctx.beginPath(); ctx.arc(7.4, -4, skin.eye ? 3 : 2, 0, 7); ctx.fill(); ctx.shadowBlur = 0;
-  if (!skin.eye) { ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(8.2, -4.9, 0.8, 0, 7); ctx.fill(); }
-  ctx.fillStyle = '#f59e0b'; ctx.beginPath(); ctx.moveTo(11, -1); ctx.lineTo(21, 2); ctx.lineTo(11, 6); ctx.closePath(); ctx.fill();
-  ctx.strokeStyle = 'rgba(120,60,0,.35)'; ctx.lineWidth = 0.8; ctx.stroke();
+  ctx.fillStyle = '#f59e0b'; ctx.beginPath(); ctx.moveTo(11, -1); ctx.lineTo(21, 2); ctx.lineTo(11, 6); ctx.fill();
   PAINT_ACC[skin.acc]?.(ctx, skin, frame);
   if (skin.acc === 'shades') { ctx.fillStyle = '#111'; ctx.fillRect(2, -8, 12, 6); ctx.fillRect(-2, -6, 5, 2); }
   if (skin.acc === 'band') { ctx.fillStyle = '#dc2626'; ctx.fillRect(-12, -10, 24, 4); ctx.beginPath(); ctx.moveTo(-12, -9); ctx.lineTo(-22, -4 + Math.sin(frame / 4) * 3); ctx.lineTo(-12, -6); ctx.fill(); }
