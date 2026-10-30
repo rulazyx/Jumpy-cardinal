@@ -18,14 +18,21 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Create project config & Install Capacitor
+      - name: Prepare web folder and Capacitor
         run: |
-          # Crée un package.json temporaire pour le projet web
+          # Crée un dossier "www" pour les fichiers web
+          mkdir www
+          
+          # Déplace tous les fichiers du jeu dedans (sauf les dossiers cachés et config git/github)
+          shopt -s extglob
+          cp -r !(www|.github|android|node_modules) www/ 2>/dev/null || true
+          
+          # Crée le package.json et installe Capacitor
           npm init -y
-          npm install @capacitor/cli @capacitor/core
-          npm install @capacitor/android
-          # Initialise Capacitor automatiquement en prenant la racine "." comme dossier web
-          npx cap init "Jumpy Cardinal" "com.rulazyx.jumpycardinal" --web-dir "."
+          npm install @capacitor/cli @capacitor/core @capacitor/android
+          
+          # Initialise Capacitor avec "www" comme web-dir valide
+          npx cap init "Jumpy Cardinal" "com.rulazyx.jumpycardinal" --web-dir "www"
 
       - name: Add Android platform
         run: npx cap add android
@@ -53,5 +60,3 @@ jobs:
         with:
           name: app-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
-
-          
