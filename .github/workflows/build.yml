@@ -2,8 +2,8 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ "main", "master" ]  # Se lance automatiquement quand vous poussez du code (ajustez "main" ou "master" selon votre branche par défaut)
-  workflow_dispatch: # Permet aussi de lancer le build manuellement depuis le site de GitHub
+    branches: [ "main", "master" ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -16,21 +16,24 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18' # Vous pouvez adapter selon votre version de Node
+          node-version: '18'
 
-      - name: Install dependencies
-        run: npm install
+      - name: Create project config & Install Capacitor
+        run: |
+          # Crée un package.json temporaire pour le projet web
+          npm init -y
+          npm install @capacitor/cli @capacitor/core
+          npm install @capacitor/android
+          # Initialise Capacitor automatiquement en prenant la racine "." comme dossier web
+          npx cap init "Jumpy Cardinal" "com.rulazyx.jumpycardinal" --web-dir "."
 
-      - name: Build web assets (si vous utilisez un framework type React/Vue/Ionic, adaptez la commande de build si besoin)
-        run: npm run build --if-present
-
-      - name: Add Android platform with Capacitor
-        run: npx cap add android || true
+      - name: Add Android platform
+        run: npx cap add android
 
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Set up JDK 17 (pour Android)
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
@@ -50,3 +53,5 @@ jobs:
         with:
           name: app-debug
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+          
