@@ -45,11 +45,14 @@ jobs:
           packages: 'platform-tools build-tools;34.0.0 platforms;android-34'
           accept-android-sdk-licenses: true
 
+      - name: Clean Gradle Cache
+        run: rm -rf ~/.gradle/caches/
+
       - name: Build Debug APK
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --refresh-dependencies
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
