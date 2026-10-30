@@ -45,10 +45,10 @@ jobs:
           packages: 'platform-tools build-tools;34.0.0 platforms;android-34'
           accept-android-sdk-licenses: true
 
-      - name: Upgrade Gradle Wrapper version
+      - name: Force Gradle 8.5 in properties
         run: |
-          cd android
-          ./gradlew wrapper --gradle-version 8.5
+          sed -i 's/gradle-8.2.1-all.zip/gradle-8.5-all.zip/g' android/gradle/wrapper/gradle-wrapper.properties
+          sed -i 's/gradle-8.2.1-bin.zip/gradle-8.5-bin.zip/g' android/gradle/wrapper/gradle-wrapper.properties
 
       - name: Build Debug APK
         run: |
